@@ -1,0 +1,106 @@
+export const MOCK_USER = {
+  id: "user_1",
+  name: "Vitor",
+  email: "vitor@example.com",
+  isPro: true,
+};
+
+export const MOCK_ITEM_TYPES = [
+  { id: "type_1", name: "Snippet", icon: "</>", isSystem: true },
+  { id: "type_2", name: "Prompt", icon: "🤖", isSystem: true },
+  { id: "type_3", name: "Note", icon: "📝", isSystem: true },
+  { id: "type_4", name: "Command", icon: "$_", isSystem: true },
+  { id: "type_5", name: "File", icon: "📄", isSystem: true },
+  { id: "type_6", name: "Image", icon: "🖼️", isSystem: true },
+  { id: "type_7", name: "URL", icon: "🔗", isSystem: true },
+];
+
+export const MOCK_COLLECTIONS = [
+  { id: "coll_1", name: "React Patterns", isFavorite: true, userId: "user_1" },
+  { id: "coll_2", name: "Context Files", isFavorite: false, userId: "user_1" },
+  {
+    id: "coll_3",
+    name: "Python Snippets",
+    isFavorite: false,
+    userId: "user_1",
+  },
+  {
+    id: "coll_4",
+    name: "Deployment Runbooks",
+    isFavorite: true,
+    userId: "user_1",
+  },
+];
+
+export const MOCK_ITEMS = [
+  {
+    id: "item_1",
+    title: "Reusable React Hook for API calls",
+    contentType: "text",
+    content:
+      "```typescript\nfunction useApi(url) {\n  // ... implementation\n}\n```",
+    isFavorite: true,
+    isPinned: true,
+    language: "typescript",
+    userId: "user_1",
+    typeId: "type_1",
+    collectionId: "coll_1",
+    createdAt: new Date("2026-03-15T10:00:00Z"),
+    updatedAt: new Date("2026-03-18T11:30:00Z"),
+  },
+  {
+    id: "item_2",
+    title: "Claude 3 Opus prompt for code generation",
+    contentType: "text",
+    content:
+      "Generate a React component for a pricing table with three tiers...",
+    isFavorite: false,
+    isPinned: false,
+    userId: "user_1",
+    typeId: "type_2",
+    collectionId: null,
+    createdAt: new Date("2026-03-17T14:20:00Z"),
+    updatedAt: new Date("2026-03-17T14:20:00Z"),
+  },
+  {
+    id: "item_3",
+    title: "Project setup notes",
+    contentType: "text",
+    content: "# Setup\n\n1. `npm install`\n2. `npm run dev`",
+    isFavorite: false,
+    isPinned: true,
+    language: "markdown",
+    userId: "user_1",
+    typeId: "type_3",
+    collectionId: "coll_2",
+    createdAt: new Date("2026-03-10T09:00:00Z"),
+    updatedAt: new Date("2026-03-10T09:00:00Z"),
+  },
+  {
+    id: "item_4",
+    title: "Prisma migrate command",
+    contentType: "text",
+    content: "prisma migrate dev --name init",
+    isFavorite: true,
+    isPinned: false,
+    language: "shell",
+    userId: "user_1",
+    typeId: "type_4",
+    collectionId: null,
+    createdAt: new Date("2026-03-12T18:05:00Z"),
+    updatedAt: new Date("2026-03-12T18:05:00Z"),
+  },
+  {
+    id: "item_5",
+    title: "Next.js v15 Docs",
+    contentType: "url",
+    url: "https://nextjs.org/docs",
+    isFavorite: true,
+    isPinned: false,
+    userId: "user_1",
+    typeId: "type_7",
+    collectionId: "coll_1",
+    createdAt: new Date("2026-03-18T08:00:00Z"),
+    updatedAt: new Date("2026-03-18T08:00:00Z"),
+  },
+];
