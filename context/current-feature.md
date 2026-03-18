@@ -16,4 +16,4 @@
 
 ## History
 
-<!-- Keep this updated. Earliest to latest -->
+- **2026-03-18**: Initial Next.js setup with Tailwind CSS v4, TypeScript, and App Router.
