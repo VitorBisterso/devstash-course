@@ -1,32 +1,18 @@
-# Prisma + Neon PostgreSQL Setup
+# Current Feature
 
-Set up Prisma ORM with Neon PostgreSQL database for DevStash.
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Install Prisma 7 with PostgreSQL adapter for Neon
-- Create initial schema with User, Item, ItemType, Collection, Tag, ItemTag models
-- Add NextAuth models (Account, Session, VerificationToken)
-- Add indexes and cascade deletes
-- Configure Prisma client singleton with driver adapter
-- Create and run initial migration
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Prisma 7 requires ESM and driver adapters
-- Use `prisma migrate dev` (never `db push`)
-- Run `prisma migrate status` before committing
-- Neon uses serverless PostgreSQL with connection pooling
-
-We will have a development branch that we work on that will be in DATABASE_URL and then we will have a production branch. So we ALWAYS create migrations and never push directly unless specified.
-
-IMPORTANT! Use Prisma 7, which has some breaking changes. Read the entire upgrade guide at https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7 to get a good idea of the changes.
-
-You can also look at the setup guide here - https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres
+<!-- Any extra notes -->
 
 ## History
 
