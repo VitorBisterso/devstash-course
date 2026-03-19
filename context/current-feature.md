@@ -22,3 +22,4 @@
 - **2026-03-18**: Completed Dashboard UI Phase 2 with collapsible sidebar, item types with links, favorite collections, recent items, user avatar, mobile drawer, DevStash logo in header, and colored type icons.
 - **2026-03-19**: Completed Dashboard UI Phase 3 with stats cards, recent collections, pinned items, recent items and scrollable main area.
 - **2026-03-19**: Started Prisma + Neon PostgreSQL setup.
+- **2026-03-19**: Completed seed data script with demo user, system item types, collections, and sample items.
