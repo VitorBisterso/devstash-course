@@ -48,6 +48,18 @@ async function testDatabase() {
       if (col.description) console.log(`    ${col.description}`)
     }
 
+    const itemCollections = await prisma.itemCollection.findMany({
+      include: {
+        item: { include: { type: true } },
+        collection: true,
+      },
+      where: { collection: { userId: user.id } },
+    })
+    console.log(`\nItemCollection Links (${itemCollections.length}):`)
+    for (const ic of itemCollections) {
+      console.log(`  [${ic.collection.name}] ${ic.item.title} (${ic.item.type.name})`)
+    }
+
     const items = await prisma.item.findMany({
       where: { userId: user.id },
       include: { type: true },

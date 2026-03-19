@@ -306,12 +306,17 @@ echo "Deployment complete!"`,
       where: { title: snippet.title, userId: user.id },
     })
     if (!exists) {
-      await prisma.item.create({
+      const item = await prisma.item.create({
         data: {
-          ...snippet,
+          title: snippet.title,
+          content: snippet.content,
+          language: snippet.language,
           userId: user.id,
           typeId: createdTypes['snippet'],
         },
+      })
+      await prisma.itemCollection.create({
+        data: { itemId: item.id, collectionId: snippet.collectionId },
       })
       console.log(`  Created: ${snippet.title}`)
     } else {
@@ -325,12 +330,16 @@ echo "Deployment complete!"`,
       where: { title: prompt.title, userId: user.id },
     })
     if (!exists) {
-      await prisma.item.create({
+      const item = await prisma.item.create({
         data: {
-          ...prompt,
+          title: prompt.title,
+          content: prompt.content,
           userId: user.id,
           typeId: createdTypes['prompt'],
         },
+      })
+      await prisma.itemCollection.create({
+        data: { itemId: item.id, collectionId: prompt.collectionId },
       })
       console.log(`  Created: ${prompt.title}`)
     } else {
@@ -345,15 +354,17 @@ echo "Deployment complete!"`,
     })
     const typeId = cmd.title === 'Deploy Script' ? createdTypes['snippet'] : createdTypes['command']
     if (!exists) {
-      await prisma.item.create({
+      const item = await prisma.item.create({
         data: {
           title: cmd.title,
           content: cmd.content,
           description: cmd.description,
           userId: user.id,
           typeId,
-          collectionId: cmd.collectionId,
         },
+      })
+      await prisma.itemCollection.create({
+        data: { itemId: item.id, collectionId: cmd.collectionId },
       })
       console.log(`  Created: ${cmd.title}`)
     } else {
@@ -367,15 +378,17 @@ echo "Deployment complete!"`,
       where: { title: link.title, userId: user.id },
     })
     if (!exists) {
-      await prisma.item.create({
+      const item = await prisma.item.create({
         data: {
           title: link.title,
           url: link.url,
           description: link.description,
           userId: user.id,
           typeId: createdTypes['link'],
-          collectionId: link.collectionId,
         },
+      })
+      await prisma.itemCollection.create({
+        data: { itemId: item.id, collectionId: link.collectionId },
       })
       console.log(`  Created: ${link.title}`)
     } else {
