@@ -4,15 +4,20 @@
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+Implement Dashboard UI Phase 3:
+- Main area to the right
+- Recent collections
+- Pinned Items
+- 10 Recent items
+- 4 stats cards at the top for number of items, collections, favorite items and favorite collections
 
 ## Notes
 
-<!-- Any extra notes -->
+See @context/features/dashboard-phase-3-spec.md for full requirements and references.
 
 ## History
 

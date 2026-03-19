@@ -36,7 +36,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
           />
         </div>
-        <main className="flex-1 bg-background p-4">
+        <main className="flex-1 overflow-y-auto bg-background p-4">
           {children}
         </main>
       </div>
