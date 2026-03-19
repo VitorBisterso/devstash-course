@@ -3,13 +3,16 @@ import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
 import { PinnedItems } from "@/components/dashboard/pinned-items";
 import { RecentItems } from "@/components/dashboard/recent-items";
+import { getRecentCollections } from "@/lib/db/collections";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const recentCollections = await getRecentCollections(6);
+
   return (
     <DashboardShell>
       <div className="space-y-8">
         <StatsCards />
-        <RecentCollections />
+        <RecentCollections collections={recentCollections} />
         <PinnedItems />
         <RecentItems />
       </div>

@@ -24,3 +24,4 @@
 - **2026-03-19**: Started Prisma + Neon PostgreSQL setup.
 - **2026-03-19**: Completed seed data script with demo user, system item types, collections, and sample items.
 - **2026-03-19**: Completed Item-Collection N:N relationship migration with ItemCollection join table.
+- **2026-03-19**: Completed Dashboard Collections - replaced dummy data with database collections, added item count, type icons, and dominant color borders.
