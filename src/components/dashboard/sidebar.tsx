@@ -24,28 +24,55 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  MOCK_USER,
-  MOCK_ITEM_TYPES,
-  MOCK_COLLECTIONS,
-  MOCK_ITEMS,
-} from "@/lib/mock-data";
+import type { SystemItemType } from "@/lib/db/items";
+import type { CollectionWithTypes } from "@/lib/db/collections";
+import type { ItemWithType } from "@/lib/db/items";
+
+interface SidebarData {
+  itemTypes: SystemItemType[];
+  favoriteCollections: CollectionWithTypes[];
+  recentItems: ItemWithType[];
+  userName: string;
+  userEmail: string;
+}
 
 const typeIcons: Record<string, React.ReactNode> = {
-  Snippet: <Code2 className="h-4 w-4 text-blue-500" />,
-  Prompt: <Bot className="h-4 w-4 text-yellow-500" />,
-  Note: <FileText className="h-4 w-4 text-green-500" />,
-  Command: <Terminal className="h-4 w-4 text-red-500" />,
-  File: <FileCode className="h-4 w-4 text-purple-500" />,
-  Image: <ImageIcon className="h-4 w-4 text-pink-500" />,
-  URL: <Link2 className="h-4 w-4 text-cyan-500" />,
+  snippet: <Code2 className="h-4 w-4" />,
+  prompt: <Bot className="h-4 w-4" />,
+  command: <Terminal className="h-4 w-4" />,
+  note: <FileText className="h-4 w-4" />,
+  file: <FileCode className="h-4 w-4" />,
+  image: <ImageIcon className="h-4 w-4" />,
+  link: <Link2 className="h-4 w-4" />,
 };
 
-function SidebarContent() {
-  const favoriteCollections = MOCK_COLLECTIONS.filter((c) => c.isFavorite);
-  const recentItems = MOCK_ITEMS.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  ).slice(0, 5);
+const typeDisplayNames: Record<string, string> = {
+  snippet: "Snippets",
+  prompt: "Prompts",
+  command: "Commands",
+  note: "Notes",
+  file: "Files",
+  image: "Images",
+  link: "Links",
+};
+
+const typeOrder = ["snippet", "prompt", "command", "note", "file", "image", "link"];
+
+function getIconWithColor(icon: React.ReactNode, color: string | null) {
+  if (!color) return icon;
+  return (
+    <span style={{ color }}>
+      {icon}
+    </span>
+  );
+}
+
+function SidebarContent({ data }: { data: SidebarData }) {
+  const sortedItemTypes = [...data.itemTypes].sort((a, b) => {
+    const indexA = typeOrder.indexOf(a.name.toLowerCase());
+    const indexB = typeOrder.indexOf(b.name.toLowerCase());
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+  });
 
   return (
     <div className="flex h-full flex-col">
@@ -56,14 +83,14 @@ function SidebarContent() {
               Items
             </h3>
             <ul className="space-y-1">
-              {MOCK_ITEM_TYPES.map((type) => (
+              {sortedItemTypes.map((type) => (
                 <li key={type.id}>
                   <Link
                     href={`/items/${type.name.toLowerCase()}`}
                     className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
-                    <span>{typeIcons[type.name] || <Code2 className="h-4 w-4" />}</span>
-                    {type.name}
+                    <span>{getIconWithColor(typeIcons[type.name.toLowerCase()] || <Code2 className="h-4 w-4" />, type.color)}</span>
+                    {typeDisplayNames[type.name.toLowerCase()] || type.name}
                   </Link>
                 </li>
               ))}
@@ -77,7 +104,7 @@ function SidebarContent() {
               <Star className="h-3 w-3" /> Favorite Collections
             </h3>
             <ul className="space-y-1">
-              {favoriteCollections.map((collection) => (
+              {data.favoriteCollections.map((collection) => (
                 <li key={collection.id}>
                   <Link
                     href={`/collections/${collection.id}`}
@@ -89,6 +116,12 @@ function SidebarContent() {
                 </li>
               ))}
             </ul>
+            <Link
+              href="/collections"
+              className="mt-2 block px-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              View all collections
+            </Link>
           </section>
 
           <Separator />
@@ -98,22 +131,26 @@ function SidebarContent() {
               <Clock className="h-3 w-3" /> Recent
             </h3>
             <ul className="space-y-1">
-              {recentItems.map((item) => {
-                const type = MOCK_ITEM_TYPES.find((t) => t.id === item.typeId);
-                return (
-                  <li key={item.id}>
-                    <Link
-                      href={`/items/${item.id}`}
-                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    >
+              {data.recentItems.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={`/items/${item.id}`}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {item.type.color ? (
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: item.type.color }}
+                      />
+                    ) : (
                       <span className="truncate">
-                        {typeIcons[type?.name || "Snippet"]}
+                        {typeIcons[item.type.name] || <Code2 className="h-4 w-4" />}
                       </span>
-                      <span className="truncate">{item.title}</span>
-                    </Link>
-                  </li>
-                );
-              })}
+                    )}
+                    <span className="truncate">{item.title}</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </section>
         </nav>
@@ -122,14 +159,14 @@ function SidebarContent() {
       <div className="border-t p-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={MOCK_USER.name} />
+            <AvatarImage src="" alt={data.userName} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              {MOCK_USER.name.charAt(0).toUpperCase()}
+              {data.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 truncate">
-            <p className="text-sm font-medium truncate">{MOCK_USER.name}</p>
-            <p className="text-xs text-muted-foreground truncate">{MOCK_USER.email}</p>
+            <p className="text-sm font-medium truncate">{data.userName}</p>
+            <p className="text-xs text-muted-foreground truncate">{data.userEmail}</p>
           </div>
         </div>
       </div>
@@ -141,9 +178,10 @@ interface SidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
   className?: string;
+  data: SidebarData;
 }
 
-export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps) {
+export function Sidebar({ collapsed = false, onToggle, className, data }: SidebarProps) {
   return (
     <aside
       className={cn(
@@ -166,12 +204,16 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
           )}
         </Button>
       </div>
-      <SidebarContent />
+      <SidebarContent data={data} />
     </aside>
   );
 }
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+  data: SidebarData;
+}
+
+export function MobileSidebar({ data }: MobileSidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -182,7 +224,7 @@ export function MobileSidebar() {
         </span>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0">
-        <SidebarContent />
+        <SidebarContent data={data} />
       </SheetContent>
     </Sheet>
   );

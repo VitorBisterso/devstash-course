@@ -2,15 +2,32 @@
 
 import { useState } from "react";
 import { Sidebar, MobileSidebar } from "@/components/dashboard/sidebar";
+import type { SystemItemType } from "@/lib/db/items";
+import type { CollectionWithTypes } from "@/lib/db/collections";
+import type { ItemWithType } from "@/lib/db/items";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export interface SidebarData {
+  itemTypes: SystemItemType[];
+  favoriteCollections: CollectionWithTypes[];
+  recentItems: ItemWithType[];
+  userName: string;
+  userEmail: string;
+}
+
+export function DashboardShell({
+  children,
+  sidebarData,
+}: {
+  children: React.ReactNode;
+  sidebarData: SidebarData;
+}) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex h-screen flex-col">
       <header className="flex h-14 items-center gap-4 border-b bg-sidebar px-4">
         <div className="flex items-center gap-2 md:hidden">
-          <MobileSidebar />
+          <MobileSidebar data={sidebarData} />
         </div>
         <div className="flex items-center gap-3 flex-1">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
@@ -34,6 +51,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <Sidebar
             collapsed={sidebarCollapsed}
             onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+            data={sidebarData}
           />
         </div>
         <main className="flex-1 overflow-y-auto bg-background p-4">

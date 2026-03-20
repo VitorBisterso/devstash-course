@@ -14,17 +14,18 @@ import {
 import { type ItemWithType } from "@/lib/db/items";
 
 const typeIcons: Record<string, React.ReactNode> = {
-  snippet: <Code2 className="h-4 w-4 text-blue-500" />,
-  prompt: <Bot className="h-4 w-4 text-yellow-500" />,
-  note: <FileText className="h-4 w-4 text-green-500" />,
-  command: <Terminal className="h-4 w-4 text-red-500" />,
-  file: <FileCode className="h-4 w-4 text-purple-500" />,
-  image: <ImageIcon className="h-4 w-4 text-pink-500" />,
-  link: <Link2 className="h-4 w-4 text-cyan-500" />,
+  snippet: <Code2 className="h-4 w-4" />,
+  prompt: <Bot className="h-4 w-4" />,
+  note: <FileText className="h-4 w-4" />,
+  command: <Terminal className="h-4 w-4" />,
+  file: <FileCode className="h-4 w-4" />,
+  image: <ImageIcon className="h-4 w-4" />,
+  link: <Link2 className="h-4 w-4" />,
 };
 
-function getIconForType(typeName: string): React.ReactNode {
-  return typeIcons[typeName.toLowerCase()] || typeIcons.snippet;
+function getIconWithColor(icon: React.ReactNode, color: string | null) {
+  if (!color) return icon;
+  return <span style={{ color }}>{icon}</span>;
 }
 
 function formatRelativeTime(date: Date): string {
@@ -70,7 +71,7 @@ export function RecentItems({ items }: RecentItemsProps) {
                 className="flex items-center gap-3 p-3 transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <span className="flex-shrink-0">
-                  {getIconForType(item.type.name)}
+                  {getIconWithColor(typeIcons[item.type.name.toLowerCase()] || typeIcons.snippet, item.type.color)}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium">{item.title}</p>

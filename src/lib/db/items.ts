@@ -69,3 +69,23 @@ export async function getRecentItems(limit = 10): Promise<ItemWithType[]> {
     },
   });
 }
+
+export interface SystemItemType {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+}
+
+export async function getSystemItemTypes(): Promise<SystemItemType[]> {
+  return prisma.itemType.findMany({
+    where: { isSystem: true },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      color: true,
+    },
+  });
+}

@@ -1,32 +1,34 @@
 import { FileCode, FolderOpen, Star, Pin } from "lucide-react";
-import { MOCK_ITEMS, MOCK_COLLECTIONS } from "@/lib/mock-data";
+import { getDashboardStats } from "@/lib/db/collections";
 
-export function StatsCards() {
-  const stats = [
+export async function StatsCards() {
+  const stats = await getDashboardStats();
+
+  const cards = [
     {
       label: "Total Items",
-      value: MOCK_ITEMS.length,
+      value: stats.totalItems,
       icon: FileCode,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },
     {
       label: "Collections",
-      value: MOCK_COLLECTIONS.length,
+      value: stats.totalCollections,
       icon: FolderOpen,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
     },
     {
       label: "Favorite Items",
-      value: MOCK_ITEMS.filter((i) => i.isFavorite).length,
+      value: stats.favoriteItems,
       icon: Star,
       color: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
     },
     {
       label: "Favorite Collections",
-      value: MOCK_COLLECTIONS.filter((c) => c.isFavorite).length,
+      value: stats.favoriteCollections,
       icon: Pin,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
@@ -35,7 +37,7 @@ export function StatsCards() {
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {stats.map((stat) => (
+      {cards.map((stat) => (
         <div
           key={stat.label}
           className="rounded-lg border bg-card p-4 text-card-foreground shadow-sm"
