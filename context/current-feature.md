@@ -25,3 +25,4 @@
 - **2026-03-19**: Completed seed data script with demo user, system item types, collections, and sample items.
 - **2026-03-19**: Completed Item-Collection N:N relationship migration with ItemCollection join table.
 - **2026-03-19**: Completed Dashboard Collections - replaced dummy data with database collections, added item count, type icons, and dominant color borders.
+- **2026-03-20**: Completed Dashboard Items - replaced dummy data with database items, added item type icons for pinned and recent items.

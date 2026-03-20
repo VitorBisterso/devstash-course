@@ -10,22 +10,28 @@ import {
   Pin,
   Star,
 } from "lucide-react";
-import { MOCK_ITEMS, MOCK_ITEM_TYPES } from "@/lib/mock-data";
+import { type ItemWithType } from "@/lib/db/items";
 
 const typeIcons: Record<string, React.ReactNode> = {
-  Snippet: <Code2 className="h-4 w-4 text-blue-500" />,
-  Prompt: <Bot className="h-4 w-4 text-yellow-500" />,
-  Note: <FileText className="h-4 w-4 text-green-500" />,
-  Command: <Terminal className="h-4 w-4 text-red-500" />,
-  File: <FileCode className="h-4 w-4 text-purple-500" />,
-  Image: <ImageIcon className="h-4 w-4 text-pink-500" />,
-  URL: <Link2 className="h-4 w-4 text-cyan-500" />,
+  snippet: <Code2 className="h-4 w-4 text-blue-500" />,
+  prompt: <Bot className="h-4 w-4 text-yellow-500" />,
+  note: <FileText className="h-4 w-4 text-green-500" />,
+  command: <Terminal className="h-4 w-4 text-red-500" />,
+  file: <FileCode className="h-4 w-4 text-purple-500" />,
+  image: <ImageIcon className="h-4 w-4 text-pink-500" />,
+  link: <Link2 className="h-4 w-4 text-cyan-500" />,
 };
 
-export function PinnedItems() {
-  const pinnedItems = MOCK_ITEMS.filter((item) => item.isPinned);
+function getIconForType(typeName: string): React.ReactNode {
+  return typeIcons[typeName.toLowerCase()] || typeIcons.snippet;
+}
 
-  if (pinnedItems.length === 0) {
+interface PinnedItemsProps {
+  items: ItemWithType[];
+}
+
+export function PinnedItems({ items }: PinnedItemsProps) {
+  if (items.length === 0) {
     return null;
   }
 
@@ -43,8 +49,7 @@ export function PinnedItems() {
         </Link>
       </div>
       <div className="grid gap-3">
-        {pinnedItems.map((item) => {
-          const type = MOCK_ITEM_TYPES.find((t) => t.id === item.typeId);
+        {items.map((item) => {
           return (
             <Link
               key={item.id}
@@ -53,12 +58,12 @@ export function PinnedItems() {
             >
               <div className="flex items-center gap-3">
                 <span className="flex-shrink-0">
-                  {typeIcons[type?.name || "Snippet"]}
+                  {getIconForType(item.type.name)}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium">{item.title}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {type?.name} {item.language && `· ${item.language}`}
+                    {item.type.name} {item.language && `· ${item.language}`}
                   </p>
                 </div>
                 {item.isFavorite && (
