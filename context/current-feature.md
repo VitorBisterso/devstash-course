@@ -27,3 +27,4 @@
 - **2026-03-19**: Completed Dashboard Collections - replaced dummy data with database collections, added item count, type icons, and dominant color borders.
 - **2026-03-20**: Completed Dashboard Items - replaced dummy data with database items, added item type icons for pinned and recent items.
 - **2026-03-20**: Completed Stats & Sidebar - replaced mock data with database data for stats, item types, favorite collections, and recent items. Added "View all collections" link. Added colored circles for recent items based on type color.
+- **2026-03-24**: Completed Add Pro Badge to Sidebar - added PRO badge to Files and Images sidebar items using ShadCN UI Badge component with clean, subtle styling.
