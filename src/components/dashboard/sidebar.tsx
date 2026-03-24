@@ -4,12 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   Code2,
-  Bot,
-  FileText,
-  Terminal,
-  FileCode,
-  Image as ImageIcon,
-  Link2,
   Star,
   Clock,
   PanelLeftClose,
@@ -19,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -28,6 +22,7 @@ import {
 import type { SystemItemType } from "@/lib/db/items";
 import type { CollectionWithTypes } from "@/lib/db/collections";
 import type { ItemWithType } from "@/lib/db/items";
+import { typeIcons, typeDisplayNames, typeOrder, getIconWithColor } from "@/lib/constants";
 
 interface SidebarData {
   itemTypes: SystemItemType[];
@@ -35,37 +30,6 @@ interface SidebarData {
   recentItems: ItemWithType[];
   userName: string;
   userEmail: string;
-}
-
-const typeIcons: Record<string, React.ReactNode> = {
-  snippet: <Code2 className="h-4 w-4" />,
-  prompt: <Bot className="h-4 w-4" />,
-  command: <Terminal className="h-4 w-4" />,
-  note: <FileText className="h-4 w-4" />,
-  file: <FileCode className="h-4 w-4" />,
-  image: <ImageIcon className="h-4 w-4" />,
-  link: <Link2 className="h-4 w-4" />,
-};
-
-const typeDisplayNames: Record<string, string> = {
-  snippet: "Snippets",
-  prompt: "Prompts",
-  command: "Commands",
-  note: "Notes",
-  file: "Files",
-  image: "Images",
-  link: "Links",
-};
-
-const typeOrder = ["snippet", "prompt", "command", "note", "file", "image", "link"];
-
-function getIconWithColor(icon: React.ReactNode, color: string | null) {
-  if (!color) return icon;
-  return (
-    <span style={{ color }}>
-      {icon}
-    </span>
-  );
 }
 
 function SidebarContent({ data }: { data: SidebarData }) {
@@ -167,7 +131,6 @@ function SidebarContent({ data }: { data: SidebarData }) {
       <div className="border-t p-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={data.userName} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
               {data.userName.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -217,11 +180,7 @@ export function Sidebar({ collapsed = false, onToggle, className, data }: Sideba
   );
 }
 
-interface MobileSidebarProps {
-  data: SidebarData;
-}
-
-export function MobileSidebar({ data }: MobileSidebarProps) {
+export function MobileSidebar({ data }: { data: SidebarData }) {
   const [open, setOpen] = useState(false);
 
   return (

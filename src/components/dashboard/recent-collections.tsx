@@ -2,25 +2,7 @@ import Link from "next/link";
 import { FolderOpen, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CollectionWithTypes } from "@/lib/db/collections";
-import {
-  Code2,
-  Bot,
-  Terminal,
-  StickyNote,
-  File,
-  Image as ImageIcon,
-  Link2,
-} from "lucide-react";
-
-const typeIconComponents: Record<string, React.ReactNode> = {
-  snippet: <Code2 className="h-3 w-3" />,
-  prompt: <Bot className="h-3 w-3" />,
-  command: <Terminal className="h-3 w-3" />,
-  note: <StickyNote className="h-3 w-3" />,
-  file: <File className="h-3 w-3" />,
-  image: <ImageIcon className="h-3 w-3" />,
-  link: <Link2 className="h-3 w-3" />,
-};
+import { typeIconsSmall } from "@/lib/constants";
 
 interface RecentCollectionsProps {
   collections: CollectionWithTypes[];
@@ -72,9 +54,7 @@ export function RecentCollections({ collections }: RecentCollectionsProps) {
                   className="flex h-5 w-5 items-center justify-center rounded bg-secondary text-secondary-foreground"
                   title={type.name}
                 >
-                  {typeIconComponents[type.name.toLowerCase()] ?? (
-                    <Code2 className="h-3 w-3" />
-                  )}
+                  {typeIconsSmall[type.name.toLowerCase()]}
                 </span>
               ))}
             </div>

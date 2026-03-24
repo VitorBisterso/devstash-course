@@ -1,39 +1,14 @@
 import Link from "next/link";
-import {
-  Code2,
-  Bot,
-  FileText,
-  Terminal,
-  FileCode,
-  Image as ImageIcon,
-  Link2,
-  Clock,
-  Star,
-  Pin,
-} from "lucide-react";
+import { Clock, Star, Pin } from "lucide-react";
 import { type ItemWithType } from "@/lib/db/items";
-
-const typeIcons: Record<string, React.ReactNode> = {
-  snippet: <Code2 className="h-4 w-4" />,
-  prompt: <Bot className="h-4 w-4" />,
-  note: <FileText className="h-4 w-4" />,
-  command: <Terminal className="h-4 w-4" />,
-  file: <FileCode className="h-4 w-4" />,
-  image: <ImageIcon className="h-4 w-4" />,
-  link: <Link2 className="h-4 w-4" />,
-};
-
-function getIconWithColor(icon: React.ReactNode, color: string | null) {
-  if (!color) return icon;
-  return <span style={{ color }}>{icon}</span>;
-}
+import { typeIcons, getIconWithColor, MINUTE_MS, HOUR_MS, DAY_MS } from "@/lib/constants";
 
 function formatRelativeTime(date: Date): string {
   const now = new Date();
   const diffMs = now.getTime() - new Date(date).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
+  const diffMins = Math.floor(diffMs / MINUTE_MS);
+  const diffHours = Math.floor(diffMs / HOUR_MS);
+  const diffDays = Math.floor(diffMs / DAY_MS);
 
   if (diffMins < 1) return "just now";
   if (diffMins < 60) return `${diffMins}m ago`;

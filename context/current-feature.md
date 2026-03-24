@@ -1,14 +1,21 @@
 # Current Feature
 
-<!-- Feature name and short description -->
+Code Quality Quick Wins - Address low-risk issues from codebase audit including N+1 query fix, code deduplication and missing UI states.
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+Complete
 
 ## Goals
 
-<!-- Goals and requirements -->
+Address high and medium severity code quality issues:
+
+- Fix N+1 query pattern in collections.ts
+- Add environment variable validation in prisma.ts
+- Fix empty avatar image source in sidebar.tsx
+- Add error.tsx and loading.tsx for server components
+- Replace magic numbers with time constants
+- Extract typeIcons and getIconWithColor to shared constants
 
 ## Notes
 
@@ -28,3 +35,6 @@
 - **2026-03-20**: Completed Dashboard Items - replaced dummy data with database items, added item type icons for pinned and recent items.
 - **2026-03-20**: Completed Stats & Sidebar - replaced mock data with database data for stats, item types, favorite collections, and recent items. Added "View all collections" link. Added colored circles for recent items based on type color.
 - **2026-03-24**: Completed Add Pro Badge to Sidebar - added PRO badge to Files and Images sidebar items using ShadCN UI Badge component with clean, subtle styling.
+- **2026-03-24**: Completed N+1 Query Fix - optimized getRecentCollections and getCollectionsWithDetails to use raw SQL aggregation instead of loading all items, reducing memory usage and improving performance.
+- **2026-03-24**: Completed High Priority Fixes - added DATABASE_URL validation in prisma.ts, removed empty AvatarImage in sidebar.tsx, created error.tsx and loading.tsx for dashboard server components.
+- **2026-03-24**: Completed Code Deduplication - extracted typeIcons, typeIconsSmall, typeDisplayNames, typeOrder, getIconWithColor, and time constants (MINUTE_MS, HOUR_MS, DAY_MS) to src/lib/constants.tsx. Updated sidebar.tsx, recent-items.tsx, pinned-items.tsx, and recent-collections.tsx to use shared constants.

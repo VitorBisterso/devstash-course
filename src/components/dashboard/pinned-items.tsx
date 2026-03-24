@@ -1,31 +1,7 @@
 import Link from "next/link";
-import {
-  Code2,
-  Bot,
-  FileText,
-  Terminal,
-  FileCode,
-  Image as ImageIcon,
-  Link2,
-  Pin,
-  Star,
-} from "lucide-react";
+import { Pin, Star } from "lucide-react";
 import { type ItemWithType } from "@/lib/db/items";
-
-const typeIcons: Record<string, React.ReactNode> = {
-  snippet: <Code2 className="h-4 w-4" />,
-  prompt: <Bot className="h-4 w-4" />,
-  note: <FileText className="h-4 w-4" />,
-  command: <Terminal className="h-4 w-4" />,
-  file: <FileCode className="h-4 w-4" />,
-  image: <ImageIcon className="h-4 w-4" />,
-  link: <Link2 className="h-4 w-4" />,
-};
-
-function getIconWithColor(icon: React.ReactNode, color: string | null) {
-  if (!color) return icon;
-  return <span style={{ color }}>{icon}</span>;
-}
+import { typeIcons, getIconWithColor } from "@/lib/constants";
 
 interface PinnedItemsProps {
   items: ItemWithType[];
