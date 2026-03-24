@@ -1,21 +1,14 @@
 # Current Feature
 
-Code Quality Quick Wins - Address low-risk issues from codebase audit including N+1 query fix, code deduplication and missing UI states.
+<!-- Feature name and short description -->
 
 ## Status
 
-Complete
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
 
-Address high and medium severity code quality issues:
-
-- Fix N+1 query pattern in collections.ts
-- Add environment variable validation in prisma.ts
-- Fix empty avatar image source in sidebar.tsx
-- Add error.tsx and loading.tsx for server components
-- Replace magic numbers with time constants
-- Extract typeIcons and getIconWithColor to shared constants
+<!-- Goals and requirements -->
 
 ## Notes
 
