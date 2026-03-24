@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sheet,
@@ -90,7 +91,14 @@ function SidebarContent({ data }: { data: SidebarData }) {
                     className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
                     <span>{getIconWithColor(typeIcons[type.name.toLowerCase()] || <Code2 className="h-4 w-4" />, type.color)}</span>
-                    {typeDisplayNames[type.name.toLowerCase()] || type.name}
+                    <span className="flex items-center gap-1.5">
+                      {typeDisplayNames[type.name.toLowerCase()] || type.name}
+                      {(type.name.toLowerCase() === "file" || type.name.toLowerCase() === "image") && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-medium">
+                          PRO
+                        </Badge>
+                      )}
+                    </span>
                   </Link>
                 </li>
               ))}
