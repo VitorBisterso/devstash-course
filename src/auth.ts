@@ -57,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        if (!user.emailVerified) {
+        if (process.env.SKIP_EMAIL_VERIFICATION !== "true" && !user.emailVerified) {
           return null;
         }
 

@@ -4,6 +4,13 @@ import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
+  if (process.env.SKIP_EMAIL_VERIFICATION === "true") {
+    return NextResponse.json(
+      { error: "Email verification is disabled" },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email } = body;

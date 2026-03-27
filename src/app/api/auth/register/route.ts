@@ -51,21 +51,28 @@ export async function POST(request: Request) {
       },
     });
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (process.env.SKIP_EMAIL_VERIFICATION !== "true") {
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token: verificationToken,
-        expires,
-      },
-    });
+      await prisma.verificationToken.create({
+        data: {
+          identifier: email,
+          token: verificationToken,
+          expires,
+        },
+      });
 
-    await sendVerificationEmail(email, verificationToken);
+      await sendVerificationEmail(email, verificationToken);
+
+      return NextResponse.json(
+        { message: "Verification email sent", userId: user.id },
+        { status: 201 }
+      );
+    }
 
     return NextResponse.json(
-      { message: "Verification email sent", userId: user.id },
+      { message: "User registered successfully", userId: user.id },
       { status: 201 }
     );
   } catch (error) {
