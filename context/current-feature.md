@@ -1,18 +1,12 @@
 # Current Feature
 
-<!-- Feature name and short description -->
-
 ## Status
 
-<!-- Not Started | In Progress | Complete -->
+Not Started
 
 ## Goals
 
-<!-- Goals and requirements -->
-
 ## Notes
-
-<!-- Any extra notes -->
 
 ## History
 
@@ -31,3 +25,4 @@
 - **2026-03-24**: Completed N+1 Query Fix - optimized getRecentCollections and getCollectionsWithDetails to use raw SQL aggregation instead of loading all items, reducing memory usage and improving performance.
 - **2026-03-24**: Completed High Priority Fixes - added DATABASE_URL validation in prisma.ts, removed empty AvatarImage in sidebar.tsx, created error.tsx and loading.tsx for dashboard server components.
 - **2026-03-24**: Completed Code Deduplication - extracted typeIcons, typeIconsSmall, typeDisplayNames, typeOrder, getIconWithColor, and time constants (MINUTE_MS, HOUR_MS, DAY_MS) to src/lib/constants.tsx. Updated sidebar.tsx, recent-items.tsx, pinned-items.tsx, and recent-collections.tsx to use shared constants.
+- **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/* routes.
