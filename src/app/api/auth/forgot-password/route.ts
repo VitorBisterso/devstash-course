@@ -2,9 +2,27 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { getIPFromHeaders, authRatelimits, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getIPFromHeaders(request.headers);
+    
+    const { ratelimit } = authRatelimits.forgotPassword;
+    const rateLimitResult = await checkRateLimit(ratelimit, ip);
+    
+    if (!rateLimitResult.success) {
+      const retryAfterSeconds = Math.max(0, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+      const retryAfterMinutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterMinutes} minute${retryAfterMinutes > 1 ? "s" : ""}.` },
+        { 
+          status: 429,
+          headers: { "Retry-After": String(retryAfterSeconds) }
+        }
+      );
+    }
+
     const body = await request.json();
     const { email } = body;
 

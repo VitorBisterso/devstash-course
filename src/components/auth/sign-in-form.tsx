@@ -8,7 +8,13 @@ import { Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function SignInForm() {
   const router = useRouter();
@@ -23,22 +29,21 @@ export function SignInForm() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password");
-        } else {
-          setError("Please verify your email before signing in. Check your inbox for the verification link.");
-        }
-      } else {
-        router.push("/dashboard");
-        router.refresh();
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Something went wrong");
+        return;
       }
+
+      router.push("/dashboard");
+      router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -78,7 +83,7 @@ export function SignInForm() {
               autoComplete="email"
             />
           </div>
-            <div className="space-y-2">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
               <Link
@@ -109,7 +114,9 @@ export function SignInForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            <span className="bg-card px-2 text-muted-foreground">
+              Or continue with
+            </span>
           </div>
         </div>
 

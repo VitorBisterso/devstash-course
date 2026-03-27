@@ -3,9 +3,29 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { getIPFromHeaders, authRatelimits, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getIPFromHeaders(request.headers);
+    
+    const { ratelimit } = authRatelimits.register;
+    const key = ip;
+    
+    const rateLimitResult = await checkRateLimit(ratelimit, key);
+    
+    if (!rateLimitResult.success) {
+      const retryAfterSeconds = Math.max(0, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+      const retryAfterMinutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterMinutes} minute${retryAfterMinutes > 1 ? "s" : ""}.` },
+        { 
+          status: 429,
+          headers: { "Retry-After": String(retryAfterSeconds) }
+        }
+      );
+    }
+
     const body = await request.json();
     const { name, email, password, confirmPassword } = body;
 

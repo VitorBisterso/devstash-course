@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
+import { getIPFromHeaders, authRatelimits, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   if (process.env.SKIP_EMAIL_VERIFICATION === "true") {
@@ -12,8 +13,26 @@ export async function POST(request: Request) {
   }
 
   try {
+    const ip = getIPFromHeaders(request.headers);
     const body = await request.json();
     const { email } = body;
+    
+    const { ratelimit, keyType } = authRatelimits.resendVerification;
+    const key = keyType === "ip-email" && email ? `${ip}:${email}` : ip;
+    
+    const rateLimitResult = await checkRateLimit(ratelimit, key);
+    
+    if (!rateLimitResult.success) {
+      const retryAfterSeconds = Math.max(0, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+      const retryAfterMinutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterMinutes} minute${retryAfterMinutes > 1 ? "s" : ""}.` },
+        { 
+          status: 429,
+          headers: { "Retry-After": String(retryAfterSeconds) }
+        }
+      );
+    }
 
     if (!email) {
       return NextResponse.json(

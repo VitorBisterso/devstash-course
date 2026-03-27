@@ -6,11 +6,7 @@ Not Started
 
 ## Goals
 
-
-
 ## Notes
-
-
 
 ## History
 
@@ -29,10 +25,11 @@ Not Started
 - **2026-03-24**: Completed N+1 Query Fix - optimized getRecentCollections and getCollectionsWithDetails to use raw SQL aggregation instead of loading all items, reducing memory usage and improving performance.
 - **2026-03-24**: Completed High Priority Fixes - added DATABASE_URL validation in prisma.ts, removed empty AvatarImage in sidebar.tsx, created error.tsx and loading.tsx for dashboard server components.
 - **2026-03-24**: Completed Code Deduplication - extracted typeIcons, typeIconsSmall, typeDisplayNames, typeOrder, getIconWithColor, and time constants (MINUTE_MS, HOUR_MS, DAY_MS) to src/lib/constants.tsx. Updated sidebar.tsx, recent-items.tsx, pinned-items.tsx, and recent-collections.tsx to use shared constants.
-- **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/* routes.
+- **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/\* routes.
 - **2026-03-27**: Completed Auth Credentials - Email/Password Provider - added Credentials provider with bcrypt validation, registration API route at /api/auth/register.
 - **2026-03-27**: Completed Auth UI - Sign In, Register & Sign Out - created custom sign-in and register pages with email/password and GitHub OAuth, reusable UserAvatar component with initials fallback, UserMenu dropdown in sidebar with profile and sign out options.
 - **2026-03-27**: Completed Email Verification on Register - added Resend for sending verification emails, created verification token on registration, verify email API endpoint, verification page UI, updated sign-in to check email verification, and added resend verification flow.
 - **2026-03-27**: Completed Email Verification Toggle - added SKIP_EMAIL_VERIFICATION env variable to bypass email verification during sign-in, registration, and resend verification flows.
 - **2026-03-27**: Completed Forgot Password - added forgot password and reset password functionality with email reset links using existing VerificationToken model, created (auth) route group for auth pages.
 - **2026-03-27**: Completed Profile Page - created profile page at /profile with user info (email, name, avatar, creation date), usage stats (total items, collections, item type breakdown), and account actions (change password for email users, delete account with confirmation). Protected route requiring authentication.
+- **2026-03-27**: Completed Rate Limiting for Auth - added Upstash Redis rate limiting to auth endpoints (login, register, forgot-password, reset-password, resend-verification) with sliding window algorithm, IP extraction from x-forwarded-for, proper 429 responses with Retry-After headers, and fail-open behavior when Redis is unavailable.
