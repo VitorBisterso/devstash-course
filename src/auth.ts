@@ -9,6 +9,9 @@ import GitHub from "next-auth/providers/github";
  * NOT edge-compatible - use auth.config.ts for edge environments.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  pages: {
+    signIn: "/sign-in",
+  },
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   callbacks: {
