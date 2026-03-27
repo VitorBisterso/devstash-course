@@ -10,7 +10,8 @@
 5. Commit with a descriptive message based on the feature
 6. Switch back to main branch
 7. Merge the feature into main
-8. Delete the feature branch
+8. Push main
+9. Delete the feature branch
 
 ```
 

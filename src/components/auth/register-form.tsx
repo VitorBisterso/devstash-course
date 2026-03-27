@@ -52,7 +52,7 @@ export function RegisterForm() {
       if (!res.ok) {
         setError(data.error || "Registration failed");
       } else {
-        toast.success("Account created! You can now sign in.", {
+        toast.success("Check your email to verify your account!", {
           style: { backgroundColor: "#22c55e", color: "#fff" },
         });
         router.push("/sign-in");

@@ -30,7 +30,11 @@ export function SignInForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password");
+        } else {
+          setError("Please verify your email before signing in. Check your inbox for the verification link.");
+        }
       } else {
         router.push("/dashboard");
         router.refresh();
