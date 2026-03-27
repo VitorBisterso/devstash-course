@@ -2,21 +2,11 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add "Forgot password?" link on sign-in page
-- Create forgot-password API route to generate reset token
-- Create reset-password API route to validate token and update password
-- Create forgot-password page UI
-- Create reset-password page UI
-- Send password reset email using Resend (reuse existing email utility)
-- Reuse existing VerificationToken model for reset tokens (24h expiry)
-
 ## Notes
-
-Use existing VerificationToken model for password reset tokens (identifier=email, token, expires).
 
 ## History
 
@@ -40,3 +30,4 @@ Use existing VerificationToken model for password reset tokens (identifier=email
 - **2026-03-27**: Completed Auth UI - Sign In, Register & Sign Out - created custom sign-in and register pages with email/password and GitHub OAuth, reusable UserAvatar component with initials fallback, UserMenu dropdown in sidebar with profile and sign out options.
 - **2026-03-27**: Completed Email Verification on Register - added Resend for sending verification emails, created verification token on registration, verify email API endpoint, verification page UI, updated sign-in to check email verification, and added resend verification flow.
 - **2026-03-27**: Completed Email Verification Toggle - added SKIP_EMAIL_VERIFICATION env variable to bypass email verification during sign-in, registration, and resend verification flows.
+- **2026-03-27**: Completed Forgot Password - added forgot password and reset password functionality with email reset links using existing VerificationToken model, created (auth) route group for auth pages.
