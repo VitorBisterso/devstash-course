@@ -8,9 +8,9 @@
 3. Add feature summary to the END of History
 4. Stage all changes
 5. Commit with a descriptive message based on the feature
-6. Push the branch to origin
-7. Merge into main
-8. Switch back to main branch
+6. Switch back to main branch
+7. Merge the feature into main
+8. Delete the feature branch
 
 ```
 

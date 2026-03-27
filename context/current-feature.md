@@ -27,3 +27,4 @@ Not Started
 - **2026-03-24**: Completed Code Deduplication - extracted typeIcons, typeIconsSmall, typeDisplayNames, typeOrder, getIconWithColor, and time constants (MINUTE_MS, HOUR_MS, DAY_MS) to src/lib/constants.tsx. Updated sidebar.tsx, recent-items.tsx, pinned-items.tsx, and recent-collections.tsx to use shared constants.
 - **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/* routes.
 - **2026-03-27**: Completed Auth Credentials - Email/Password Provider - added Credentials provider with bcrypt validation, registration API route at /api/auth/register.
+- **2026-03-27**: Completed Auth UI - Sign In, Register & Sign Out - created custom sign-in and register pages with email/password and GitHub OAuth, reusable UserAvatar component with initials fallback, UserMenu dropdown in sidebar with profile and sign out options.

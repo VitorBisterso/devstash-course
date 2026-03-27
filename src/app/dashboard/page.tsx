@@ -3,26 +3,29 @@ import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
 import { PinnedItems } from "@/components/dashboard/pinned-items";
 import { RecentItems } from "@/components/dashboard/recent-items";
-import { getRecentCollections, getFavoriteCollections, getDemoUser } from "@/lib/db/collections";
+import { getRecentCollections, getFavoriteCollections } from "@/lib/db/collections";
 import { getPinnedItems, getRecentItems, getSystemItemTypes } from "@/lib/db/items";
+import { auth } from "@/auth";
 
 export default async function DashboardPage() {
-  const [recentCollections, pinnedItems, recentItems, itemTypes, favoriteCollections, user] =
+  const session = await auth();
+
+  const [recentCollections, pinnedItems, recentItems, itemTypes, favoriteCollections] =
     await Promise.all([
       getRecentCollections(6),
       getPinnedItems(),
       getRecentItems(10),
       getSystemItemTypes(),
       getFavoriteCollections(),
-      getDemoUser(),
     ]);
 
   const sidebarData = {
     itemTypes,
     favoriteCollections,
     recentItems,
-    userName: user?.name ?? "User",
-    userEmail: user?.email ?? "",
+    userName: session?.user?.name ?? "User",
+    userEmail: session?.user?.email ?? "",
+    userImage: session?.user?.image ?? null,
   };
 
   return (

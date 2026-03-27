@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserMenu } from "@/components/dashboard/user-menu";
 import {
   Sheet,
   SheetContent,
@@ -30,6 +30,7 @@ interface SidebarData {
   recentItems: ItemWithType[];
   userName: string;
   userEmail: string;
+  userImage?: string | null;
 }
 
 function SidebarContent({ data }: { data: SidebarData }) {
@@ -128,19 +129,11 @@ function SidebarContent({ data }: { data: SidebarData }) {
         </nav>
       </div>
 
-      <div className="border-t p-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              {data.userName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 truncate">
-            <p className="text-sm font-medium truncate">{data.userName}</p>
-            <p className="text-xs text-muted-foreground truncate">{data.userEmail}</p>
-          </div>
-        </div>
-      </div>
+      <UserMenu
+        name={data.userName}
+        email={data.userEmail}
+        image={data.userImage}
+      />
     </div>
   );
 }
