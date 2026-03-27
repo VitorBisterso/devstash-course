@@ -1,4 +1,5 @@
 import GitHub from "next-auth/providers/github";
+import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
 /**
@@ -7,5 +8,15 @@ import type { NextAuthConfig } from "next-auth";
  * Used by proxy.ts for route protection in edge environments.
  */
 export default {
-  providers: [GitHub],
+  providers: [
+    GitHub,
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: () => null,
+    }),
+  ],
 } satisfies NextAuthConfig;
