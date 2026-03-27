@@ -21,3 +21,25 @@ export async function sendVerificationEmail(email: string, token: string) {
     `,
   });
 }
+
+export async function sendPasswordResetEmail(email: string, token: string) {
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+
+  await resend.emails.send({
+    from: "DevStash <onboarding@resend.dev>",
+    to: email,
+    subject: "Reset your DevStash password",
+    html: `
+      <h1>Reset your password</h1>
+      <p>You requested a password reset for your DevStash account.</p>
+      <p>Click the button below to reset your password:</p>
+      <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin: 16px 0;">
+        Reset Password
+      </a>
+      <p>Or copy and paste this link in your browser:</p>
+      <p>${resetUrl}</p>
+      <p>This link expires in 24 hours.</p>
+      <p>If you didn't request this, please ignore this email.</p>
+    `,
+  });
+}

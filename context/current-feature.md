@@ -2,11 +2,21 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add "Forgot password?" link on sign-in page
+- Create forgot-password API route to generate reset token
+- Create reset-password API route to validate token and update password
+- Create forgot-password page UI
+- Create reset-password page UI
+- Send password reset email using Resend (reuse existing email utility)
+- Reuse existing VerificationToken model for reset tokens (24h expiry)
+
 ## Notes
+
+Use existing VerificationToken model for password reset tokens (identifier=email, token, expires).
 
 ## History
 

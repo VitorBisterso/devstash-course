@@ -12,3 +12,5 @@
    - Set Status to "Not Started"
 
 3. Confirm spec loaded and show the feature summary
+
+4. Do NOT start to implement the feature without being told to
