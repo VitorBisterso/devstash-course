@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Github } from "lucide-react";
+import { signInWithGitHub } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,10 +49,6 @@ export function SignInForm() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGitHubSignIn = () => {
-    signIn("github", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -120,15 +116,12 @@ export function SignInForm() {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGitHubSignIn}
-          type="button"
-        >
-          <Github className="mr-2 h-4 w-4" />
-          Sign in with GitHub
-        </Button>
+        <form action={signInWithGitHub}>
+          <Button variant="outline" className="w-full" type="submit">
+            <Github className="mr-2 h-4 w-4" />
+            Sign in with GitHub
+          </Button>
+        </form>
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
