@@ -89,3 +89,34 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
     },
   });
 }
+
+export async function getItemsByType(typeName: string): Promise<ItemWithType[]> {
+  const user = await prisma.user.findUnique({
+    where: { email: DEMO_USER_EMAIL },
+  });
+
+  if (!user) return [];
+
+  return prisma.item.findMany({
+    where: {
+      userId: user.id,
+      type: {
+        name: {
+          equals: typeName,
+          mode: "insensitive",
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      type: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true,
+        },
+      },
+    },
+  });
+}
