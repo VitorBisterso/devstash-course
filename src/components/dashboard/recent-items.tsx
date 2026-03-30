@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Clock, Star, Pin } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { type ItemWithType } from "@/lib/db/items";
 import { typeIcons, getIconWithColor, MINUTE_MS, HOUR_MS, DAY_MS } from "@/lib/constants";
 
@@ -43,7 +44,15 @@ export function RecentItems({ items }: RecentItemsProps) {
               <Link
                 key={item.id}
                 href={`/items/${item.id}`}
-                className="flex items-center gap-3 p-3 transition-colors hover:bg-accent hover:text-accent-foreground"
+                className={cn(
+                  "flex items-center gap-3 p-3 transition-colors hover:bg-accent hover:text-accent-foreground",
+                  item.type.color && "border-l-4"
+                )}
+                style={
+                  item.type.color
+                    ? { borderLeftColor: item.type.color }
+                    : undefined
+                }
               >
                 <span className="flex-shrink-0">
                   {getIconWithColor(typeIcons[item.type.name.toLowerCase()] || typeIcons.snippet, item.type.color)}

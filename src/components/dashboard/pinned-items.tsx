@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Pin, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { type ItemWithType } from "@/lib/db/items";
 import { typeIcons, getIconWithColor } from "@/lib/constants";
 
@@ -31,7 +32,15 @@ export function PinnedItems({ items }: PinnedItemsProps) {
             <Link
               key={item.id}
               href={`/items/${item.id}`}
-              className="rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              className={cn(
+                "rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                item.type.color && "border-l-4"
+              )}
+              style={
+                item.type.color
+                  ? { borderLeftColor: item.type.color }
+                  : undefined
+              }
             >
               <div className="flex items-center gap-3">
                 <span className="flex-shrink-0">
