@@ -1,8 +1,12 @@
 import { FileCode, FolderOpen, Star, Pin } from "lucide-react";
 import { getDashboardStats } from "@/lib/db/collections";
 
-export async function StatsCards() {
-  const stats = await getDashboardStats();
+interface StatsCardsProps {
+  userId: string;
+}
+
+export async function StatsCards({ userId }: StatsCardsProps) {
+  const stats = await getDashboardStats(userId);
 
   const cards = [
     {

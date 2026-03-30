@@ -20,8 +20,8 @@ export default async function ProfilePage() {
     getUserStats(session.user.id),
     getUserAuthMethods(session.user.id),
     getSystemItemTypes(),
-    getFavoriteCollections(),
-    getRecentItems(5),
+    getFavoriteCollections(session.user.id),
+    getRecentItems(session.user.id, 5),
   ]);
 
   if (!profile) {

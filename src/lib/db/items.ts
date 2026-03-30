@@ -1,7 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-const DEMO_USER_EMAIL = "demo@devstash.io";
-
 export interface ItemWithType {
   id: string;
   title: string;
@@ -20,16 +18,10 @@ export interface ItemWithType {
   };
 }
 
-export async function getPinnedItems(): Promise<ItemWithType[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-  });
-
-  if (!user) return [];
-
+export async function getPinnedItems(userId: string): Promise<ItemWithType[]> {
   return prisma.item.findMany({
     where: {
-      userId: user.id,
+      userId,
       isPinned: true,
     },
     orderBy: { updatedAt: "desc" },
@@ -46,15 +38,9 @@ export async function getPinnedItems(): Promise<ItemWithType[]> {
   });
 }
 
-export async function getRecentItems(limit = 10): Promise<ItemWithType[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-  });
-
-  if (!user) return [];
-
+export async function getRecentItems(userId: string, limit = 10): Promise<ItemWithType[]> {
   return prisma.item.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
     include: {
@@ -90,16 +76,10 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
   });
 }
 
-export async function getItemsByType(typeName: string): Promise<ItemWithType[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-  });
-
-  if (!user) return [];
-
+export async function getItemsByType(userId: string, typeName: string): Promise<ItemWithType[]> {
   return prisma.item.findMany({
     where: {
-      userId: user.id,
+      userId,
       type: {
         name: {
           equals: typeName,

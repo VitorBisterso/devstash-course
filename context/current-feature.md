@@ -35,3 +35,4 @@ Not Started
 - **2026-03-27**: Completed Rate Limiting for Auth - added Upstash Redis rate limiting to auth endpoints (login, register, forgot-password, reset-password, resend-verification) with sliding window algorithm, IP extraction from x-forwarded-for, proper 429 responses with Retry-After headers, and fail-open behavior when Redis is unavailable.
 - **2026-03-27**: Completed GitHub OAuth Redirect Fix - switched from client-side `signIn` to server-side `signIn` via Server Action, using `redirectTo` (NextAuth v5) for reliable single-click redirect to /dashboard.
 - **2026-03-30**: Completed Items List View - created dynamic route `/items/[type]` with type-filtered items, responsive grid layout, and colored left border by item type.
+- **2026-03-30**: Completed Demo User Mock - removed DEMO_USER_EMAIL constant, refactored all DB functions to accept userId parameter, added auth redirect to dashboard, and updated all page callers to pass session user ID.

@@ -25,10 +25,10 @@ export default async function ItemsByTypePage({ params }: PageProps) {
   const typeName = typeParam.charAt(0).toUpperCase() + typeParam.slice(1).toLowerCase();
 
   const [items, itemTypes, favoriteCollections, recentItems] = await Promise.all([
-    getItemsByType(typeName),
+    getItemsByType(session.user.id, typeName),
     getSystemItemTypes(),
-    getFavoriteCollections(),
-    getRecentItems(5),
+    getFavoriteCollections(session.user.id),
+    getRecentItems(session.user.id, 5),
   ]);
 
   const sidebarData = {

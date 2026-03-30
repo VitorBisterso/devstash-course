@@ -16,8 +16,6 @@ export interface CollectionWithTypes {
   dominantColor: string | null;
 }
 
-const DEMO_USER_EMAIL = "demo@devstash.io";
-
 interface TypeAggregationRow {
   collectionId: string;
   typeId: string;
@@ -25,12 +23,6 @@ interface TypeAggregationRow {
   type_name: string;
   type_icon: string | null;
   type_color: string | null;
-}
-
-export async function getDemoUser() {
-  return prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-  });
 }
 
 async function getTypeAggregationsForCollections(collectionIds: string[]): Promise<Map<string, { count: number; type: CollectionItemType }[]>> {
@@ -82,12 +74,9 @@ function buildCollectionWithTypes(
   };
 }
 
-export async function getRecentCollections(limit = 6): Promise<CollectionWithTypes[]> {
-  const user = await getDemoUser();
-  if (!user) return [];
-
+export async function getRecentCollections(userId: string, limit = 6): Promise<CollectionWithTypes[]> {
   const collections = await prisma.collection.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
     select: {
@@ -104,12 +93,9 @@ export async function getRecentCollections(limit = 6): Promise<CollectionWithTyp
   return collections.map((c) => buildCollectionWithTypes(c, typeAggregations));
 }
 
-export async function getFavoriteCollections(): Promise<CollectionWithTypes[]> {
-  const user = await getDemoUser();
-  if (!user) return [];
-
+export async function getFavoriteCollections(userId: string): Promise<CollectionWithTypes[]> {
   const collections = await prisma.collection.findMany({
-    where: { userId: user.id, isFavorite: true },
+    where: { userId, isFavorite: true },
     orderBy: { updatedAt: "desc" },
     take: 10,
     select: {
@@ -133,18 +119,12 @@ export interface DashboardStats {
   favoriteCollections: number;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const user = await getDemoUser();
-
-  if (!user) {
-    return { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 };
-  }
-
+export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
-    prisma.item.count({ where: { userId: user.id } }),
-    prisma.collection.count({ where: { userId: user.id } }),
-    prisma.item.count({ where: { userId: user.id, isFavorite: true } }),
-    prisma.collection.count({ where: { userId: user.id, isFavorite: true } }),
+    prisma.item.count({ where: { userId } }),
+    prisma.collection.count({ where: { userId } }),
+    prisma.item.count({ where: { userId, isFavorite: true } }),
+    prisma.collection.count({ where: { userId, isFavorite: true } }),
   ]);
 
   return { totalItems, totalCollections, favoriteItems, favoriteCollections };

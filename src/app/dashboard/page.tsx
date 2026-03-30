@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
@@ -10,13 +11,19 @@ import { auth } from "@/auth";
 export default async function DashboardPage() {
   const session = await auth();
 
+  if (!session?.user?.id) {
+    redirect("/api/auth/signin");
+  }
+
+  const userId = session.user.id;
+
   const [recentCollections, pinnedItems, recentItems, itemTypes, favoriteCollections] =
     await Promise.all([
-      getRecentCollections(6),
-      getPinnedItems(),
-      getRecentItems(10),
+      getRecentCollections(userId, 6),
+      getPinnedItems(userId),
+      getRecentItems(userId, 10),
       getSystemItemTypes(),
-      getFavoriteCollections(),
+      getFavoriteCollections(userId),
     ]);
 
   const sidebarData = {
@@ -31,7 +38,7 @@ export default async function DashboardPage() {
   return (
     <DashboardShell sidebarData={sidebarData}>
       <div className="space-y-8">
-        <StatsCards />
+        <StatsCards userId={userId} />
         <RecentCollections collections={recentCollections} />
         <PinnedItems items={pinnedItems} />
         <RecentItems items={recentItems} />
