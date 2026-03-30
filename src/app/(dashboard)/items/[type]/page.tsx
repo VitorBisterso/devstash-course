@@ -73,7 +73,7 @@ export default async function ItemsByTypePage({ params }: PageProps) {
             </p>
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
               <Link
                 key={item.id}

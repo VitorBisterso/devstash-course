@@ -36,3 +36,4 @@ Not Started
 - **2026-03-27**: Completed GitHub OAuth Redirect Fix - switched from client-side `signIn` to server-side `signIn` via Server Action, using `redirectTo` (NextAuth v5) for reliable single-click redirect to /dashboard.
 - **2026-03-30**: Completed Items List View - created dynamic route `/items/[type]` with type-filtered items, responsive grid layout, and colored left border by item type.
 - **2026-03-30**: Completed Demo User Mock - removed DEMO_USER_EMAIL constant, refactored all DB functions to accept userId parameter, added auth redirect to dashboard, and updated all page callers to pass session user ID.
+- **2026-03-30**: Completed Items List View Three Columns - changed item listing grid from two columns to three columns on lg screens (1024px+) for better use of screen real estate.
