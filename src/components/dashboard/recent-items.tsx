@@ -1,8 +1,10 @@
-import Link from "next/link";
+"use client";
+
 import { Clock, Star, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type ItemWithType } from "@/lib/db/items";
 import { typeIcons, getIconWithColor, MINUTE_MS, HOUR_MS, DAY_MS } from "@/lib/constants";
+import { useItemDrawer } from "./item-drawer-controller";
 
 function formatRelativeTime(date: Date): string {
   const now = new Date();
@@ -23,6 +25,7 @@ interface RecentItemsProps {
 }
 
 export function RecentItems({ items }: RecentItemsProps) {
+  const { onItemClick } = useItemDrawer();
 
   return (
     <section>
@@ -30,22 +33,16 @@ export function RecentItems({ items }: RecentItemsProps) {
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Clock className="h-4 w-4" /> Recent Items
         </h2>
-        <Link
-          href="/items"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          View all
-        </Link>
       </div>
       <div className="rounded-lg border bg-card shadow-sm">
         <div className="divide-y">
           {items.map((item) => {
             return (
-              <Link
+              <div
                 key={item.id}
-                href={`/items/${item.id}`}
+                onClick={() => onItemClick(item.id)}
                 className={cn(
-                  "flex items-center gap-3 p-3 transition-colors hover:bg-accent hover:text-accent-foreground",
+                  "flex items-center gap-3 p-3 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                   item.type.color && "border-l-4"
                 )}
                 style={
@@ -74,7 +71,7 @@ export function RecentItems({ items }: RecentItemsProps) {
                     {formatRelativeTime(item.updatedAt)}
                   </span>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

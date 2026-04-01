@@ -1,14 +1,18 @@
-import Link from "next/link";
+"use client";
+
 import { Pin, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type ItemWithType } from "@/lib/db/items";
 import { typeIcons, getIconWithColor } from "@/lib/constants";
+import { useItemDrawer } from "./item-drawer-controller";
 
 interface PinnedItemsProps {
   items: ItemWithType[];
 }
 
 export function PinnedItems({ items }: PinnedItemsProps) {
+  const { onItemClick } = useItemDrawer();
+
   if (items.length === 0) {
     return null;
   }
@@ -19,21 +23,15 @@ export function PinnedItems({ items }: PinnedItemsProps) {
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Pin className="h-4 w-4" /> Pinned Items
         </h2>
-        <Link
-          href="/items/pinned"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          View all
-        </Link>
       </div>
       <div className="grid gap-3">
         {items.map((item) => {
           return (
-            <Link
+            <div
               key={item.id}
-              href={`/items/${item.id}`}
+              onClick={() => onItemClick(item.id)}
               className={cn(
-                "rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                "rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 item.type.color && "border-l-4"
               )}
               style={
@@ -56,7 +54,7 @@ export function PinnedItems({ items }: PinnedItemsProps) {
                   <Star className="h-4 w-4 flex-shrink-0 fill-yellow-500 text-yellow-500" />
                 )}
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>

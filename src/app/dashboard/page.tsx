@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
 import { PinnedItems } from "@/components/dashboard/pinned-items";
@@ -37,12 +38,14 @@ export default async function DashboardPage() {
 
   return (
     <DashboardShell sidebarData={sidebarData}>
-      <div className="space-y-8">
-        <StatsCards userId={userId} />
-        <RecentCollections collections={recentCollections} />
-        <PinnedItems items={pinnedItems} />
-        <RecentItems items={recentItems} />
-      </div>
+      <ItemDrawerController>
+        <div className="space-y-8">
+          <StatsCards userId={userId} />
+          <RecentCollections collections={recentCollections} />
+          <PinnedItems items={pinnedItems} />
+          <RecentItems items={recentItems} />
+        </div>
+      </ItemDrawerController>
     </DashboardShell>
   );
 }
