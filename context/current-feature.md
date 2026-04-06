@@ -1,26 +1,14 @@
 # Current Feature
-Item Drawer
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Use shadcn Sheet component, opens from the right
-- Clicking an ItemCard opens the drawer with that item's full data
-- Works on both dashboard and items list pages
-- Action bar with Favorite (star icon, yellow when active), Pin, Copy, Edit (pencil icon), and Delete (trash icon, right-aligned)
-- Client wrapper component to manage drawer state since pages are server components
-- Should feel snappy — fetch on click, no page navigation
 
 ## Notes
 
-- Card data (title, description, tags, etc.) is fetched by the server component as before
-- Full item detail (content, collections, language, etc.) is fetched on click via API route (`/api/items/[id]`)
-- Query function lives in `lib/db/items.ts`, API route calls it with auth check
-- Drawer shows a skeleton/loading state while fetching
-- Reference: `context/screenshots/dashboard-ui-drawer.png`
 
 ## History
 
@@ -51,3 +39,5 @@ In Progress
 - **2026-03-30**: Completed Items List View - created dynamic route `/items/[type]` with type-filtered items, responsive grid layout, and colored left border by item type.
 - **2026-03-30**: Completed Demo User Mock - removed DEMO_USER_EMAIL constant, refactored all DB functions to accept userId parameter, added auth redirect to dashboard, and updated all page callers to pass session user ID.
 - **2026-03-30**: Completed Items List View Three Columns - changed item listing grid from two columns to three columns on lg screens (1024px+) for better use of screen real estate.
+- **2026-04-01**: Completed Item Drawer - added shadcn Sheet drawer that opens from right on item click, fetches full item details via API with skeleton loading state, action bar with Favorite, Pin, Copy, Edit, and Delete, client wrapper for server component compatibility, unit tests for getItemById.
+- **2026-04-06**: Completed Item Drawer Edit Mode - added edit mode to item drawer with Save/Cancel buttons, editable fields (Title, Description, Tags, type-specific fields), Zod validation in server action, toast notifications, updateItem server action and query function, disconnect/connect-or-create tag handling, disabled Save button when title is empty, and router.refresh() after save.
