@@ -1,5 +1,24 @@
 import { prisma } from "@/lib/prisma";
 
+export async function deleteItem(userId: string, itemId: string): Promise<boolean> {
+  const item = await prisma.item.findFirst({
+    where: {
+      id: itemId,
+      userId,
+    },
+  });
+
+  if (!item) return false;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.itemTag.deleteMany({ where: { itemId } });
+    await tx.itemCollection.deleteMany({ where: { itemId } });
+    await tx.item.delete({ where: { id: itemId } });
+  });
+
+  return true;
+}
+
 export interface ItemWithType {
   id: string;
   title: string;

@@ -10,6 +10,7 @@ Not Started
 ## Notes
 
 
+
 ## History
 
 - **2026-03-18**: Initial Next.js setup with Tailwind CSS v4, TypeScript, and App Router.
@@ -41,3 +42,4 @@ Not Started
 - **2026-03-30**: Completed Items List View Three Columns - changed item listing grid from two columns to three columns on lg screens (1024px+) for better use of screen real estate.
 - **2026-04-01**: Completed Item Drawer - added shadcn Sheet drawer that opens from right on item click, fetches full item details via API with skeleton loading state, action bar with Favorite, Pin, Copy, Edit, and Delete, client wrapper for server component compatibility, unit tests for getItemById.
 - **2026-04-06**: Completed Item Drawer Edit Mode - added edit mode to item drawer with Save/Cancel buttons, editable fields (Title, Description, Tags, type-specific fields), Zod validation in server action, toast notifications, updateItem server action and query function, disconnect/connect-or-create tag handling, disabled Save button when title is empty, and router.refresh() after save.
+- **2026-04-06**: Completed Delete Item Functionality - added shadcn UI AlertDialog confirmation dialog in item drawer, deleteItem database function, DELETE API endpoint, toast notifications on success/error, and unit tests for deleteItem.

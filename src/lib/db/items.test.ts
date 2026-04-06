@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getItemById, updateItem } from "./items";
+import { getItemById, updateItem, deleteItem } from "./items";
 import { prisma } from "@/lib/prisma";
 
 const mockItemBase = {
@@ -47,10 +47,14 @@ vi.mock("@/lib/prisma", () => ({
       findFirst: vi.fn<() => Promise<MockItem | MockItemMinimal | null>>(),
       findUnique: vi.fn<() => Promise<MockItem | null>>(),
       update: vi.fn<() => Promise<MockItem>>(),
+      delete: vi.fn<() => Promise<MockItem>>(),
     },
     itemTag: {
       deleteMany: vi.fn<() => Promise<{ count: number }>>(),
       create: vi.fn<() => Promise<{ itemId: string; tagId: string }>>(),
+    },
+    itemCollection: {
+      deleteMany: vi.fn<() => Promise<{ count: number }>>(),
     },
     tag: {
       upsert: vi.fn<() => Promise<{ id: string; name: string; userId: string }>>(),
@@ -275,5 +279,61 @@ describe("updateItem", () => {
       where: { itemId: "item-123" },
     });
     expect(result?.tags).toEqual(["newtag"]);
+  });
+});
+
+describe("deleteItem", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns false when item not found", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null);
+
+    const result = await deleteItem("user-123", "item-456");
+
+    expect(result).toBe(false);
+    expect(prisma.item.findFirst).toHaveBeenCalledWith({
+      where: { id: "item-456", userId: "user-123" },
+    });
+  });
+
+  it("deletes item and returns true on success", async () => {
+    const mockItemWithRelations = {
+      ...mockItemBase,
+      title: "Test Item",
+      tags: [] as { tag: { name: string } }[],
+      collections: [] as { collection: { id: string; name: string } }[],
+      type: mockItemType,
+    };
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(mockItemWithRelations);
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) => {
+      return callback(prisma);
+    });
+    vi.mocked(prisma.itemTag.deleteMany).mockResolvedValue({ count: 1 });
+    vi.mocked(prisma.itemCollection.deleteMany).mockResolvedValue({ count: 0 });
+    vi.mocked(prisma.item.delete).mockResolvedValue(
+      {
+        ...mockItemBase,
+        title: "Test Item",
+        tags: [],
+        collections: [],
+        type: mockItemType,
+      } as unknown as MockItem
+    );
+
+    const result = await deleteItem("user-123", "item-123");
+
+    expect(result).toBe(true);
+    expect(prisma.itemTag.deleteMany).toHaveBeenCalledWith({
+      where: { itemId: "item-123" },
+    });
+    expect(prisma.itemCollection.deleteMany).toHaveBeenCalledWith({
+      where: { itemId: "item-123" },
+    });
+    expect(prisma.item.delete).toHaveBeenCalledWith({
+      where: { id: "item-123" },
+    });
   });
 });

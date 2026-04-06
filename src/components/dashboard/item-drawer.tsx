@@ -12,6 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { typeIcons, getIconWithColor } from "@/lib/constants";
 import type { ItemDetail } from "@/lib/db/items";
 import { updateItem } from "@/actions/items";
@@ -47,6 +58,8 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [copied, setCopied] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState<EditFormData>({
     title: "",
     description: "",
@@ -104,15 +117,21 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 
   const handleDelete = async () => {
     if (!item) return;
-    if (!confirm("Are you sure you want to delete this item?")) return;
-
-    const res = await fetch(`/api/items/${item.id}`, { method: "DELETE" });
-    if (res.ok) {
-      toast.success("Item deleted");
-      onClose();
-      router.refresh();
-    } else {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/items/${item.id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Item deleted");
+        setDeleteOpen(false);
+        onClose();
+        router.refresh();
+      } else {
+        toast.error("Failed to delete item");
+      }
+    } catch {
       toast.error("Failed to delete item");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -346,9 +365,31 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <div className="flex-1" />
-                  <Button variant="ghost" size="sm" onClick={handleDelete}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <AlertDialogTrigger>
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Item</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete &ldquo;{item.title}&rdquo;? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDelete}
+                          disabled={deleting}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {deleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
 
                 <div className="mt-6 space-y-4">
