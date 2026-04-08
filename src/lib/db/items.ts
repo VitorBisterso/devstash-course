@@ -41,7 +41,7 @@ export async function createItem(
         content: data.content,
         url: data.url,
         language: data.language,
-        contentType: data.language ? `text/${data.language}` : null,
+        contentType: data.language ? `text/${data.language}` : undefined,
         userId,
         typeId: data.typeId,
       },

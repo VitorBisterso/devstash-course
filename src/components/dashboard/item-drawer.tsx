@@ -27,6 +27,7 @@ import { typeIcons, getIconWithColor } from "@/lib/constants";
 import type { ItemDetail } from "@/lib/db/items";
 import { updateItem } from "@/actions/items";
 import { Star, Pin, Pencil, Trash2, Copy, Check, Loader2, Save, X } from "lucide-react";
+import { CodeEditor } from "./code-editor";
 import { toast } from "sonner";
 
 interface ItemDrawerProps {
@@ -276,12 +277,10 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 {typeSpecificField === "content" && (
                   <div>
                     <Label htmlFor="edit-content" className="mb-1 block">Content</Label>
-                    <textarea
-                      id="edit-content"
+                    <CodeEditor
                       value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                      placeholder="Content"
-                      className="w-full min-h-[120px] rounded-lg border border-input bg-transparent px-3 py-2 text-sm font-mono transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 resize-none"
+                      onChange={(val) => setFormData({ ...formData, content: val })}
+                      language={item.type.name.toLowerCase() === "snippet" || item.type.name.toLowerCase() === "command" ? formData.language || "plaintext" : "plaintext"}
                     />
                   </div>
                 )}
@@ -407,10 +406,20 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   )}
 
                   {item.content && (
-                    <div className="rounded-md border bg-muted/50 p-4">
-                      <pre className="whitespace-pre-wrap break-all text-sm font-mono">
-                        {item.content}
-                      </pre>
+                    <div>
+                      {["snippet", "command"].includes(item.type.name.toLowerCase()) ? (
+                        <CodeEditor
+                          value={item.content}
+                          readOnly
+                          language={item.language || "plaintext"}
+                        />
+                      ) : (
+                        <div className="rounded-md border bg-muted/50 p-4">
+                          <pre className="whitespace-pre-wrap break-all text-sm font-mono">
+                            {item.content}
+                          </pre>
+                        </div>
+                      )}
                     </div>
                   )}
 

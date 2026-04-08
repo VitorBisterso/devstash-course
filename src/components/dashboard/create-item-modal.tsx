@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { CodeEditor } from "./code-editor";
 
 interface SystemItemType {
   id: string;
@@ -148,7 +149,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
                 value={selectedType}
                 onValueChange={(value) => {
                   const type = itemTypes.find((t) => t.id === value);
-                  setSelectedType(value);
+                  setSelectedType(value || "");
                   setSelectedTypeName(type?.name || "");
                 }}
                 required
@@ -221,17 +222,27 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
             )}
 
             {isContentType && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="content" className="text-right">
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="content" className="text-right pt-2">
                   Content
                 </Label>
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="col-span-3 min-h-[100px] flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Enter content"
-                />
+                {isCodeType ? (
+                  <div className="col-span-3">
+                    <CodeEditor
+                      value={content}
+                      onChange={setContent}
+                      language={language || "plaintext"}
+                    />
+                  </div>
+                ) : (
+                  <textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="col-span-3 min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Enter content"
+                  />
+                )}
               </div>
             )}
 

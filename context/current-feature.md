@@ -2,7 +2,7 @@
 
 ## Status
 
-Not Started
+Complete
 
 ## Goals
 
@@ -44,3 +44,4 @@ Not Started
 - **2026-04-06**: Completed Item Drawer Edit Mode - added edit mode to item drawer with Save/Cancel buttons, editable fields (Title, Description, Tags, type-specific fields), Zod validation in server action, toast notifications, updateItem server action and query function, disconnect/connect-or-create tag handling, disabled Save button when title is empty, and router.refresh() after save.
 - **2026-04-06**: Completed Delete Item Functionality - added shadcn UI AlertDialog confirmation dialog in item drawer, deleteItem database function, DELETE API endpoint, toast notifications on success/error, and unit tests for deleteItem.
 - **2026-04-08**: Completed Item Create - added modal dialog from "New Item" button in top bar with shadcn Dialog component, type selector with proper labels, dynamic fields based on selected type (snippet/command: content+language, prompt/note: content, link: URL), server action createItem with Zod validation, query function in lib/db/items.ts, toast notifications, and unit tests.
+- **2026-04-08**: Completed Code Editor - added Monaco Editor component with dark theme, macOS window dots, copy button, line numbers, and language display. Used in create-item-modal and item-drawer for snippets/commands (both view and edit modes).
