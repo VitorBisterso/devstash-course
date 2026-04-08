@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getItemById, updateItem, deleteItem } from "./items";
+import { getItemById, updateItem, deleteItem, createItem } from "./items";
 import { prisma } from "@/lib/prisma";
 
 const mockItemBase = {
@@ -48,6 +48,7 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: vi.fn<() => Promise<MockItem | null>>(),
       update: vi.fn<() => Promise<MockItem>>(),
       delete: vi.fn<() => Promise<MockItem>>(),
+      create: vi.fn<() => Promise<MockItem>>(),
     },
     itemTag: {
       deleteMany: vi.fn<() => Promise<{ count: number }>>(),
@@ -335,5 +336,90 @@ describe("deleteItem", () => {
     expect(prisma.item.delete).toHaveBeenCalledWith({
       where: { id: "item-123" },
     });
+  });
+});
+
+describe("createItem", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("creates item with tags", async () => {
+    const mockTag = { id: "tag-1", name: "newtag", userId: "user-123" };
+    const mockCreatedItem: MockItemMinimal = {
+      ...mockItemBase,
+      title: "Test Item",
+      description: "Test description",
+      content: "Test content",
+      language: "javascript",
+      tags: [],
+      collections: [],
+      type: mockItemType,
+    };
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) => {
+      return callback(prisma);
+    });
+    vi.mocked(prisma.tag.upsert).mockResolvedValue(mockTag);
+    vi.mocked(prisma.item.create).mockResolvedValue(mockCreatedItem);
+    vi.mocked(prisma.itemTag.create).mockResolvedValue({
+      itemId: "item-123",
+      tagId: "tag-1",
+    });
+
+    const result = await createItem("user-123", {
+      title: "Test Item",
+      description: "Test description",
+      content: "Test content",
+      url: null,
+      language: "javascript",
+      typeId: "type-1",
+      tags: ["newtag"],
+    });
+
+    expect(result).toEqual({ id: "item-123" });
+    expect(prisma.item.create).toHaveBeenCalledWith({
+      data: {
+        title: "Test Item",
+        description: "Test description",
+        content: "Test content",
+        url: null,
+        language: "javascript",
+        contentType: "text/javascript",
+        userId: "user-123",
+        typeId: "type-1",
+      },
+    });
+  });
+
+  it("creates item without tags", async () => {
+    const mockCreatedItem: MockItemMinimal = {
+      ...mockItemBase,
+      title: "Test Item",
+      description: null,
+      content: null,
+      language: null,
+      tags: [],
+      collections: [],
+      type: mockItemType,
+    };
+
+    vi.mocked(prisma.$transaction).mockImplementation(async (callback) => {
+      return callback(prisma);
+    });
+    vi.mocked(prisma.tag.upsert).mockResolvedValue({ id: "tag-1", name: "newtag", userId: "user-123" });
+    vi.mocked(prisma.item.create).mockResolvedValue(mockCreatedItem);
+
+    const result = await createItem("user-123", {
+      title: "Test Item",
+      description: null,
+      content: null,
+      url: null,
+      language: null,
+      typeId: "type-1",
+      tags: [],
+    });
+
+    expect(result).toEqual({ id: "item-123" });
   });
 });

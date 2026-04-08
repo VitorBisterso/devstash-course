@@ -1,5 +1,67 @@
 import { prisma } from "@/lib/prisma";
 
+export interface CreateItemInput {
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  typeId: string;
+  tags: string[];
+}
+
+export async function createItem(
+  userId: string,
+  data: CreateItemInput
+): Promise<{ id: string }> {
+  const tagCreations = data.tags.map((tagName) => {
+    const normalizedName = tagName.trim().toLowerCase();
+    return prisma.tag.upsert({
+      where: {
+        name_userId: {
+          name: normalizedName,
+          userId,
+        },
+      },
+      update: {},
+      create: {
+        name: normalizedName,
+        userId,
+      },
+    });
+  });
+
+  const result = await prisma.$transaction(async (tx) => {
+    const tagRecords = await Promise.all(tagCreations);
+
+    const item = await tx.item.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        url: data.url,
+        language: data.language,
+        contentType: data.language ? `text/${data.language}` : null,
+        userId,
+        typeId: data.typeId,
+      },
+    });
+
+    for (const tag of tagRecords) {
+      await tx.itemTag.create({
+        data: {
+          itemId: item.id,
+          tagId: tag.id,
+        },
+      });
+    }
+
+    return item;
+  });
+
+  return { id: result.id };
+}
+
 export async function deleteItem(userId: string, itemId: string): Promise<boolean> {
   const item = await prisma.item.findFirst({
     where: {
