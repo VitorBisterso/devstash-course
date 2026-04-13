@@ -28,6 +28,7 @@ import type { ItemDetail } from "@/lib/db/items";
 import { updateItem } from "@/actions/items";
 import { Star, Pin, Pencil, Trash2, Copy, Check, Loader2, Save, X } from "lucide-react";
 import { CodeEditor } from "./code-editor";
+import { MarkdownEditor } from "./markdown-editor";
 import { toast } from "sonner";
 
 interface ItemDrawerProps {
@@ -277,11 +278,18 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 {typeSpecificField === "content" && (
                   <div>
                     <Label htmlFor="edit-content" className="mb-1 block">Content</Label>
-                    <CodeEditor
-                      value={formData.content}
-                      onChange={(val) => setFormData({ ...formData, content: val })}
-                      language={item.type.name.toLowerCase() === "snippet" || item.type.name.toLowerCase() === "command" ? formData.language || "plaintext" : "plaintext"}
-                    />
+                    {["snippet", "command"].includes(item.type.name.toLowerCase()) ? (
+                      <CodeEditor
+                        value={formData.content}
+                        onChange={(val) => setFormData({ ...formData, content: val })}
+                        language={item.type.name.toLowerCase() === "snippet" || item.type.name.toLowerCase() === "command" ? formData.language || "plaintext" : "plaintext"}
+                      />
+                    ) : (
+                      <MarkdownEditor
+                        value={formData.content}
+                        onChange={(val) => setFormData({ ...formData, content: val })}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -414,11 +422,10 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                           language={item.language || "plaintext"}
                         />
                       ) : (
-                        <div className="rounded-md border bg-muted/50 p-4">
-                          <pre className="whitespace-pre-wrap break-all text-sm font-mono">
-                            {item.content}
-                          </pre>
-                        </div>
+                        <MarkdownEditor
+                          value={item.content}
+                          readOnly
+                        />
                       )}
                     </div>
                   )}
