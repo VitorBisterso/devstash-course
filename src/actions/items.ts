@@ -20,6 +20,9 @@ const createItemSchema = z.object({
   language: z.string().nullable().optional(),
   typeId: z.string().min(1, "Type is required"),
   tags: z.array(z.string().min(1).transform((v) => v.trim())).default([]),
+  fileUrl: z.string().nullable().optional(),
+  fileName: z.string().nullable().optional(),
+  fileSize: z.number().nullable().optional(),
 });
 
 export type CreateItemInput = z.infer<typeof createItemSchema>;
@@ -65,6 +68,9 @@ export async function createItem(data: unknown): Promise<CreateItemResult> {
       language: parsed.data.language ?? null,
       typeId: parsed.data.typeId,
       tags: parsed.data.tags,
+      fileUrl: parsed.data.fileUrl ?? null,
+      fileName: parsed.data.fileName ?? null,
+      fileSize: parsed.data.fileSize ?? null,
     });
 
     return { success: true, data: result };
@@ -109,6 +115,9 @@ export interface UpdateItemResult {
     isFavorite: boolean;
     isPinned: boolean;
     language: string | null;
+    fileUrl: string | null;
+    fileName: string | null;
+    fileSize: number | null;
     tags: string[];
     createdAt: Date;
     updatedAt: Date;

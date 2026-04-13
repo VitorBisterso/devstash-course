@@ -26,10 +26,18 @@ import {
 import { typeIcons, getIconWithColor } from "@/lib/constants";
 import type { ItemDetail } from "@/lib/db/items";
 import { updateItem } from "@/actions/items";
-import { Star, Pin, Pencil, Trash2, Copy, Check, Loader2, Save, X } from "lucide-react";
+import { Star, Pin, Pencil, Trash2, Copy, Check, Loader2, Save, X, Download, File } from "lucide-react";
 import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
 import { toast } from "sonner";
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
 
 interface ItemDrawerProps {
   itemId: string | null;
@@ -426,6 +434,38 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                           value={item.content}
                           readOnly
                         />
+                      )}
+                    </div>
+                  )}
+
+                  {item.fileUrl && (
+                    <div>
+                      {item.fileName?.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i) ? (
+                        <div className="relative rounded-md overflow-hidden bg-muted">
+                          <img
+                            src={item.fileUrl}
+                            alt={item.fileName || "Image"}
+                            className="max-h-64 w-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-md bg-muted p-4">
+                          <File className="h-8 w-8 text-muted-foreground" />
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate text-sm font-medium">{item.fileName}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.fileSize ? formatFileSize(item.fileSize) : "File"}
+                            </p>
+                          </div>
+                          <a
+                            href={`/api/download?key=${encodeURIComponent(item.fileUrl)}`}
+                            download={item.fileName}
+                            className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground hover:bg-primary/90"
+                          >
+                            <Download className="h-3 w-3" />
+                            Download
+                          </a>
+                        </div>
                       )}
                     </div>
                   )}

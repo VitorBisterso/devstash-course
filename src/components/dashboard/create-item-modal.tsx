@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
+import { FileUpload } from "./file-upload";
 
 interface SystemItemType {
   id: string;
@@ -49,6 +50,12 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const [language, setLanguage] = useState("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState("");
+  const [fileData, setFileData] = useState<{
+    url: string;
+    fileName: string;
+    fileSize: number;
+    contentType: string;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -66,6 +73,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
     setLanguage("");
     setUrl("");
     setTags("");
+    setFileData(null);
   };
 
   const handleClose = (isOpen: boolean) => {
@@ -90,9 +98,17 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
 
     const selectedTypeData = itemTypes.find((t) => t.id === selectedType);
     const isLinkType = selectedTypeData?.name.toLowerCase() === "link";
+    const isFileType = ["file", "image"].includes(
+      selectedTypeData?.name.toLowerCase() || ""
+    );
 
     if (isLinkType && !url.trim()) {
       toast.error("URL is required for links");
+      return;
+    }
+
+    if (isFileType && !fileData) {
+      toast.error("File is required");
       return;
     }
 
@@ -110,6 +126,9 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
           .split(",")
           .map((t) => t.trim())
           .filter((t) => t.length > 0),
+        fileUrl: fileData?.url || null,
+        fileName: fileData?.fileName || null,
+        fileSize: fileData?.fileSize || null,
       });
 
       if (result.success) {
@@ -130,6 +149,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const isContentType = ["snippet", "command", "prompt", "note"].includes(typeName);
   const isCodeType = ["snippet", "command"].includes(typeName);
   const isLinkType = typeName === "link";
+  const isFileType = ["file", "image"].includes(typeName);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -261,6 +281,19 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
               </div>
             )}
 
+            {isFileType && (
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">File</Label>
+                <div className="col-span-3">
+                  <FileUpload
+                    type={typeName as "file" | "image"}
+                    onFileUploaded={setFileData}
+                    value={fileData?.url}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
                 Description
@@ -295,7 +328,15 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !title.trim() || !selectedType}>
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting ||
+                !title.trim() ||
+                !selectedType ||
+                (isFileType && !fileData)
+              }
+            >
               {isSubmitting ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>

@@ -1,4 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { deleteFromR2 } from "@/lib/r2";
+
+function extractR2Key(fileUrl: string): string | null {
+  const publicUrl = process.env.R2_PUBLIC_URL;
+  if (!publicUrl) return null;
+  if (!fileUrl.startsWith(publicUrl)) return null;
+  return fileUrl.replace(publicUrl + "/", "");
+}
 
 export interface CreateItemInput {
   title: string;
@@ -8,6 +16,9 @@ export interface CreateItemInput {
   language: string | null;
   typeId: string;
   tags: string[];
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 }
 
 export async function createItem(
@@ -42,6 +53,9 @@ export async function createItem(
         url: data.url,
         language: data.language,
         contentType: data.language ? `text/${data.language}` : undefined,
+        fileUrl: data.fileUrl ?? undefined,
+        fileName: data.fileName ?? undefined,
+        fileSize: data.fileSize ?? undefined,
         userId,
         typeId: data.typeId,
       },
@@ -72,6 +86,17 @@ export async function deleteItem(userId: string, itemId: string): Promise<boolea
 
   if (!item) return false;
 
+  if (item.fileUrl) {
+    const key = extractR2Key(item.fileUrl);
+    if (key) {
+      try {
+        await deleteFromR2(key);
+      } catch (error) {
+        console.error("Failed to delete file from R2:", error);
+      }
+    }
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.itemTag.deleteMany({ where: { itemId } });
     await tx.itemCollection.deleteMany({ where: { itemId } });
@@ -90,6 +115,9 @@ export interface ItemWithType {
   isFavorite: boolean;
   isPinned: boolean;
   language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   updatedAt: Date;
   type: {
     id: string;
@@ -192,6 +220,9 @@ export interface ItemDetail {
   isFavorite: boolean;
   isPinned: boolean;
   language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -256,6 +287,9 @@ export async function getItemById(userId: string, itemId: string): Promise<ItemD
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     language: item.language,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     tags: item.tags.map((t) => t.tag.name),
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
@@ -271,6 +305,9 @@ export interface UpdateItemInput {
   url: string | null;
   language: string | null;
   tags: string[];
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 }
 
 export async function updateItem(
@@ -375,6 +412,9 @@ export async function updateItem(
     isFavorite: result.isFavorite,
     isPinned: result.isPinned,
     language: result.language,
+    fileUrl: result.fileUrl,
+    fileName: result.fileName,
+    fileSize: result.fileSize,
     tags: result.tags.map((t) => t.tag.name),
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
