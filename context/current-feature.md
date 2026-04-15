@@ -1,35 +1,12 @@
-# File Upload with Cloudflare R2
+# Current Feature
 
 ## Status
 
-Complete
+Not Started
 
 ## Goals
 
-- Create upload API route for R2 storage
-- Stick to lib/db/items.ts for prisma/db functions
-- Create FileUpload component with drag-and-drop
-- Update create item modal to use FileUpload for file/image types
-- Delete files from R2 when items are deleted
-- Create download proxy API route (avoids CORS issues)
-- Add download button in ItemDrawer for file types
-- Show upload progress indicator
-- Display image preview for images, file info for files
-
 ## Notes
-
-**File Constraints:**
-
-| Type   | Max Size | Extensions                                            |
-| ------ | -------- | ----------------------------------------------------- |
-| Images | 5 MB     | `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`      |
-| Files  | 10 MB    | `.pdf`, `.txt`, `.md`, `.json`, `.yaml`, `.yml`, `.xml`, `.csv`, `.toml`, `.ini` |
-
-**MIME Types:**
-
-Images: `image/png`, `image/jpeg`, `image/gif`, `image/webp`, `image/svg+xml`
-
-Files: `application/pdf`, `text/plain`, `text/markdown`, `application/json`, `application/x-yaml`, `text/yaml`, `application/xml`, `text/xml`, `text/csv`, `application/toml`
 
 ## History
 
@@ -48,7 +25,7 @@ Files: `application/pdf`, `text/plain`, `text/markdown`, `application/json`, `ap
 - **2026-03-24**: Completed N+1 Query Fix - optimized getRecentCollections and getCollectionsWithDetails to use raw SQL aggregation instead of loading all items, reducing memory usage and improving performance.
 - **2026-03-24**: Completed High Priority Fixes - added DATABASE_URL validation in prisma.ts, removed empty AvatarImage in sidebar.tsx, created error.tsx and loading.tsx for dashboard server components.
 - **2026-03-24**: Completed Code Deduplication - extracted typeIcons, typeIconsSmall, typeDisplayNames, typeOrder, getIconWithColor, and time constants (MINUTE_MS, HOUR_MS, DAY_MS) to src/lib/constants.tsx. Updated sidebar.tsx, recent-items.tsx, pinned-items.tsx, and recent-collections.tsx to use shared constants.
-- **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/* routes.
+- **2026-03-27**: Completed Auth Setup - NextAuth + GitHub Provider with split auth config pattern for edge compatibility, JWT strategy, and route protection for /dashboard/\* routes.
 - **2026-03-27**: Completed Auth Credentials - Email/Password Provider - added Credentials provider with bcrypt validation, registration API route at /api/auth/register.
 - **2026-03-27**: Completed Auth UI - Sign In, Register & Sign Out - created custom sign-in and register pages with email/password and GitHub OAuth, reusable UserAvatar component with initials fallback, UserMenu dropdown in sidebar with profile and sign out options.
 - **2026-03-27**: Completed Email Verification on Register - added Resend for sending verification emails, created verification token on registration, verify email API endpoint, verification page UI, updated sign-in to check email verification, and added resend verification flow.
@@ -66,3 +43,4 @@ Files: `application/pdf`, `text/plain`, `text/markdown`, `application/json`, `ap
 - **2026-04-08**: Completed Item Create - added modal dialog from "New Item" button in top bar with shadcn Dialog component, type selector with proper labels, dynamic fields based on selected type (snippet/command: content+language, prompt/note: content, link: URL), server action createItem with Zod validation, query function in lib/db/items.ts, toast notifications, and unit tests.
 - **2026-04-08**: Completed Code Editor - added Monaco Editor component with dark theme, macOS window dots, copy button, line numbers, and language display. Used in create-item-modal and item-drawer for snippets/commands (both view and edit modes).
 - **2026-04-13**: Completed Markdown Editor - added MarkdownEditor component with Write/Preview tabs for notes and prompts, using react-markdown with remark-gfm for GitHub Flavored Markdown support. Styled with dark theme matching CodeEditor, copy button, fluid height with max 400px. Updated create-item-modal and item-drawer to use MarkdownEditor for notes/prompts while keeping CodeEditor for snippets/commands.
+- **2026-04-15**: Completed Image Gallery View - created image thumbnail cards with 16:9 aspect ratio, 3-column grid layout, hover zoom effect (5% scale, 300ms), and file size display.
