@@ -5,11 +5,11 @@ import { getFromR2 } from "@/lib/r2";
 function extractKey(fileUrlOrKey: string): string | null {
   const publicUrl = process.env.R2_PUBLIC_URL;
   if (!publicUrl) return null;
-  
-  if (fileUrlOrKey.includes(publicUrl)) {
-    return fileUrlOrKey.replace(`${publicUrl}/`, "");
+
+  if (fileUrlOrKey.startsWith(publicUrl + "/")) {
+    return fileUrlOrKey.substring(publicUrl.length + 1);
   }
-  
+
   return fileUrlOrKey;
 }
 

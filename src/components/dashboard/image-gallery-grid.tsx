@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { type ItemWithType } from "@/lib/db/items";
 import { Star, Pin } from "lucide-react";
 import { useItemDrawer } from "./item-drawer-controller";
@@ -28,10 +29,12 @@ export function ImageGalleryGrid({ items }: ImageGalleryGridProps) {
           className="group relative overflow-hidden rounded-lg border bg-card cursor-pointer"
         >
           <div className="aspect-video overflow-hidden">
-            <img
+            <Image
               src={item.fileUrl || ""}
               alt={item.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              unoptimized
             />
           </div>
           <div className="p-3">

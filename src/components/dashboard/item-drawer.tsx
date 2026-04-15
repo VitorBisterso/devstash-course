@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -441,11 +442,13 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   {item.fileUrl && (
                     <div>
                       {item.fileName?.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i) ? (
-                        <div className="relative rounded-md overflow-hidden bg-muted">
-                          <img
+                        <div className="relative h-64 w-full rounded-md overflow-hidden bg-muted">
+                          <Image
                             src={item.fileUrl}
                             alt={item.fileName || "Image"}
-                            className="max-h-64 w-full object-contain"
+                            fill
+                            className="object-contain"
+                            unoptimized
                           />
                         </div>
                       ) : (

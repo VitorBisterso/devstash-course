@@ -75,3 +75,8 @@ export const authRatelimits = {
     keyType: "ip-email" as const,
   },
 };
+
+export const uploadRatelimit = {
+  ratelimit: createRateLimiter(20, 60, "ratelimit:upload"),
+  keyType: "user-id" as const,
+};

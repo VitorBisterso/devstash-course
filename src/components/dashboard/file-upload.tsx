@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Upload, File, Image as ImageIcon, X, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -168,10 +169,12 @@ export function FileUpload({ type, onFileUploaded, value }: FileUploadProps) {
       <div className="relative rounded-md border bg-card p-4">
         {isImage(uploadData.contentType) ? (
           <div className="relative aspect-video max-h-48 overflow-hidden rounded bg-muted">
-            <img
+            <Image
               src={uploadData.url}
               alt={uploadData.fileName}
-              className="h-full w-full object-contain"
+              fill
+              className="object-contain"
+              unoptimized
             />
           </div>
         ) : (

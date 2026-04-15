@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { uploadToR2 } from "@/lib/r2";
 import { v4 as uuidv4 } from "uuid";
+import { checkRateLimit, uploadRatelimit } from "@/lib/rate-limit";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -53,6 +54,21 @@ export async function POST(request: NextRequest) {
 
   if (!session?.user?.id) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const rateLimitResult = await checkRateLimit(
+    uploadRatelimit.ratelimit,
+    session.user.id
+  );
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many uploads. Please try again later." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil((rateLimitResult.reset - Date.now()) / 1000)) },
+      }
+    );
   }
 
   const formData = await request.formData();
