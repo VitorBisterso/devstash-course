@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createItem, getItemTypes } from "@/actions/items";
-import { typeDisplayNames } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
@@ -15,17 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { CodeEditor } from "./code-editor";
-import { MarkdownEditor } from "./markdown-editor";
-import { FileUpload } from "./file-upload";
+import { ItemTypeSelect } from "./item-type-select";
+import { ContentEditor, FileField, UrlField } from "./item-form-fields";
 
 interface SystemItemType {
   id: string;
@@ -39,6 +30,13 @@ interface CreateItemModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface FileData {
+  url: string;
+  fileName: string;
+  fileSize: number;
+  contentType: string;
+}
+
 export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const router = useRouter();
   const [itemTypes, setItemTypes] = useState<SystemItemType[]>([]);
@@ -50,12 +48,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const [language, setLanguage] = useState("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState("");
-  const [fileData, setFileData] = useState<{
-    url: string;
-    fileName: string;
-    fileSize: number;
-    contentType: string;
-  } | null>(null);
+  const [fileData, setFileData] = useState<FileData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -146,8 +139,6 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   };
 
   const typeName = selectedTypeName.toLowerCase();
-  const isContentType = ["snippet", "command", "prompt", "note"].includes(typeName);
-  const isCodeType = ["snippet", "command"].includes(typeName);
   const isLinkType = typeName === "link";
   const isFileType = ["file", "image"].includes(typeName);
 
@@ -162,54 +153,15 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
-              </Label>
-                <Select
-                value={selectedType}
-                onValueChange={(value) => {
-                  const type = itemTypes.find((t) => t.id === value);
-                  setSelectedType(value || "");
-                  setSelectedTypeName(type?.name || "");
-                }}
-                required
-              >
-                <SelectTrigger className="col-span-3">
-                  {selectedType && selectedTypeName ? (
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const type = itemTypes.find((t) => t.id === selectedType);
-                        return type?.color ? (
-                          <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: type.color }}
-                          />
-                        ) : null;
-                      })()}
-                      {typeDisplayNames[selectedTypeName.toLowerCase()] || selectedTypeName}
-                    </div>
-                  ) : (
-                    <SelectValue placeholder="Select type" />
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {itemTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      <div className="flex items-center gap-2">
-                        {type.color && (
-                          <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: type.color }}
-                          />
-                        )}
-                        {typeDisplayNames[type.name.toLowerCase()] || type.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ItemTypeSelect
+              value={selectedType}
+              typeName={selectedTypeName}
+              itemTypes={itemTypes}
+              onChange={(id, name) => {
+                setSelectedType(id);
+                setSelectedTypeName(name);
+              }}
+            />
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">
@@ -226,72 +178,27 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
             </div>
 
             {isLinkType && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="url" className="text-right">
-                  URL
-                </Label>
-                <Input
-                  id="url"
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="col-span-3"
-                  placeholder="https://example.com"
-                  required={isLinkType}
-                />
-              </div>
+              <UrlField
+                url={url}
+                onChange={setUrl}
+                required={isLinkType}
+              />
             )}
 
-            {isContentType && (
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="content" className="text-right pt-2">
-                  Content
-                </Label>
-                {isCodeType ? (
-                  <div className="col-span-3">
-                    <CodeEditor
-                      value={content}
-                      onChange={setContent}
-                      language={language || "plaintext"}
-                    />
-                  </div>
-                ) : (
-                  <div className="col-span-3">
-                    <MarkdownEditor
-                      value={content}
-                      onChange={setContent}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {isCodeType && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="language" className="text-right">
-                  Language
-                </Label>
-                <Input
-                  id="language"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="col-span-3"
-                  placeholder="e.g., javascript, python, go"
-                />
-              </div>
-            )}
+            <ContentEditor
+              typeName={typeName}
+              content={content}
+              language={language}
+              onContentChange={setContent}
+              onLanguageChange={setLanguage}
+            />
 
             {isFileType && (
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label className="text-right pt-2">File</Label>
-                <div className="col-span-3">
-                  <FileUpload
-                    type={typeName as "file" | "image"}
-                    onFileUploaded={setFileData}
-                    value={fileData?.url}
-                  />
-                </div>
-              </div>
+              <FileField
+                typeName={typeName as "file" | "image"}
+                fileData={fileData}
+                onFileUploaded={setFileData}
+              />
             )}
 
             <div className="grid grid-cols-4 items-center gap-4">

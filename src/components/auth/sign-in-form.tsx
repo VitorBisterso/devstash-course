@@ -1,20 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github } from "lucide-react";
 import { signInWithGitHub } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  AuthCard,
+  ErrorAlert,
+  OAuthButtons,
+  FormField,
+  PasswordField,
+  LinkPrompt,
+} from "./auth-components";
 
 export function SignInForm() {
   const router = useRouter();
@@ -52,84 +49,43 @@ export function SignInForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-        <CardDescription>
-          Enter your email and password to sign in to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-muted-foreground hover:text-primary"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
-        </form>
+    <AuthCard
+      title="Sign In"
+      description="Enter your email and password to sign in to your account"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <ErrorAlert error={error} />}
+        <FormField
+          label="Email"
+          id="email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={setEmail}
+          required
+          autoComplete="email"
+        />
+        <PasswordField
+          id="password"
+          placeholder="Enter your password"
+          value={password}
+          onChange={setPassword}
+          required
+          autoComplete="current-password"
+          showForgotLink
+        />
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </Button>
+      </form>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
+      <OAuthButtons action={signInWithGitHub} />
 
-        <form action={signInWithGitHub}>
-          <Button variant="outline" className="w-full" type="submit">
-            <Github className="mr-2 h-4 w-4" />
-            Sign in with GitHub
-          </Button>
-        </form>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary hover:underline">
-            Register
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+      <LinkPrompt
+        text="Don't have an account?"
+        href="/register"
+        linkText="Register"
+      />
+    </AuthCard>
   );
 }

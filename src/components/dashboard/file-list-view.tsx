@@ -4,40 +4,11 @@ import { type ItemWithType } from "@/lib/db/items";
 import { Clock, Star, Pin, Download } from "lucide-react";
 import { useItemDrawer } from "./item-drawer-controller";
 import Link from "next/link";
+import { formatFileSize } from "@/lib/format";
+import { getFileIconConfig } from "@/lib/file-icons";
 
 interface FileListViewProps {
   items: ItemWithType[];
-}
-
-function getFileExtension(filename: string): string {
-  const parts = filename.split(".");
-  return parts.length > 1 ? parts.pop()?.toLowerCase() ?? "" : "";
-}
-
-function getFileIcon(filename: string) {
-  const ext = getFileExtension(filename);
-  const iconMap: Record<string, React.ReactNode> = {
-    pdf: <FileIcon name="PDF" color="#e53935" />,
-    doc: <FileIcon name="DOC" color="#2196f3" />,
-    docx: <FileIcon name="DOC" color="#2196f3" />,
-    xls: <FileIcon name="XLS" color="#4caf50" />,
-    xlsx: <FileIcon name="XLS" color="#4caf50" />,
-    ppt: <FileIcon name="PPT" color="#ff9800" />,
-    pptx: <FileIcon name="PPT" color="#ff9800" />,
-    zip: <FileIcon name="ZIP" color="#9c27b0" />,
-    rar: <FileIcon name="RAR" color="#9c27b0" />,
-    txt: <FileIcon name="TXT" color="#607d8b" />,
-    csv: <FileIcon name="CSV" color="#4caf50" />,
-    json: <FileIcon name="JSON" color="#ff9800" />,
-    xml: <FileIcon name="XML" color="#ff9800" />,
-    html: <FileIcon name="HTML" color="#e44d26" />,
-    css: <FileIcon name="CSS" color="#264de4" />,
-    js: <FileIcon name="JS" color="#f7df1e" />,
-    ts: <FileIcon name="TS" color="#3178c6" />,
-    py: <FileIcon name="PY" color="#3776ab" />,
-    default: <FileIcon name="FILE" color="#607d8b" />,
-  };
-  return iconMap[ext] || iconMap.default;
 }
 
 function FileIcon({ name, color }: { name: string; color: string }) {
@@ -49,14 +20,6 @@ function FileIcon({ name, color }: { name: string; color: string }) {
       {name}
     </div>
   );
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
 function formatDate(date: Date): string {
@@ -95,7 +58,10 @@ export function FileListView({ items }: FileListViewProps) {
           >
             <div className="col-span-1 md:col-span-5 flex items-center gap-3 min-w-0">
               <span className="flex-shrink-0">
-                {getFileIcon(item.title)}
+                {(() => {
+                  const config = getFileIconConfig(item.title);
+                  return <FileIcon name={config.name} color={config.color} />;
+                })()}
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <p className="truncate font-medium text-sm md:text-base">{item.title}</p>

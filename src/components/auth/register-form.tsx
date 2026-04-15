@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AuthCard,
+  ErrorAlert,
+  FormField,
+  PasswordField,
+  LinkPrompt,
+} from "./auth-components";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -65,84 +68,60 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-        <CardDescription>
-          Enter your details to create a new account
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoComplete="name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating account..." : "Register"}
-          </Button>
-        </form>
+    <AuthCard
+      title="Create Account"
+      description="Enter your details to create a new account"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <ErrorAlert error={error} />}
+        <FormField
+          label="Name"
+          id="name"
+          type="text"
+          placeholder="John Doe"
+          value={name}
+          onChange={setName}
+          required
+          autoComplete="name"
+        />
+        <FormField
+          label="Email"
+          id="email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={setEmail}
+          required
+          autoComplete="email"
+        />
+        <PasswordField
+          id="password"
+          label="Password"
+          placeholder="Create a password"
+          value={password}
+          onChange={setPassword}
+          required
+          autoComplete="new-password"
+        />
+        <PasswordField
+          id="confirmPassword"
+          label="Confirm Password"
+          placeholder="Confirm your password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          required
+          autoComplete="new-password"
+        />
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Creating account..." : "Register"}
+        </Button>
+      </form>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/sign-in" className="text-primary hover:underline">
-            Sign In
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+      <LinkPrompt
+        text="Already have an account?"
+        href="/sign-in"
+        linkText="Sign In"
+      />
+    </AuthCard>
   );
 }

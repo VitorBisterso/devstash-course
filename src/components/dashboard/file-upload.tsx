@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, File, Image as ImageIcon, X, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { formatFileSize } from "@/lib/format";
 
 interface FileUploadProps {
   type: "image" | "file";
@@ -150,14 +151,6 @@ export function FileUpload({ type, onFileUploaded, value }: FileUploadProps) {
 
   const handleRemove = () => {
     setUploadData(null);
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
   const isImage = (contentType: string): boolean => {
