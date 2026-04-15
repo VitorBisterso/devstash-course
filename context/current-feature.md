@@ -10,7 +10,6 @@ Not Started
 
 ## History
 
-- **2026-03-18**: Initial Next.js setup with Tailwind CSS v4, TypeScript, and App Router.
 - **2026-03-18**: Started Dashboard UI Phase 1 implementation.
 - **2026-03-18**: Completed Dashboard UI Phase 1 with ShadCN UI initialization, dark mode, dashboard route, top bar, and placeholder layout.
 - **2026-03-18**: Completed Dashboard UI Phase 2 with collapsible sidebar, item types with links, favorite collections, recent items, user avatar, mobile drawer, DevStash logo in header, and colored type icons.
@@ -44,3 +43,4 @@ Not Started
 - **2026-04-08**: Completed Code Editor - added Monaco Editor component with dark theme, macOS window dots, copy button, line numbers, and language display. Used in create-item-modal and item-drawer for snippets/commands (both view and edit modes).
 - **2026-04-13**: Completed Markdown Editor - added MarkdownEditor component with Write/Preview tabs for notes and prompts, using react-markdown with remark-gfm for GitHub Flavored Markdown support. Styled with dark theme matching CodeEditor, copy button, fluid height with max 400px. Updated create-item-modal and item-drawer to use MarkdownEditor for notes/prompts while keeping CodeEditor for snippets/commands.
 - **2026-04-15**: Completed Image Gallery View - created image thumbnail cards with 16:9 aspect ratio, 3-column grid layout, hover zoom effect (5% scale, 300ms), and file size display.
+- **2026-04-15**: Completed File List View - created file list view for /items/files with single-column list layout (Google Drive/Dropbox style), file icons by extension, file name, size, upload date, download button, row hover highlight, click to open ItemDrawer, responsive mobile layout.

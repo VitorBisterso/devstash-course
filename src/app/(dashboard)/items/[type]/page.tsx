@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { DashboardItemsGrid } from "@/components/dashboard/dashboard-items-grid";
 import { ImageGalleryGrid } from "@/components/dashboard/image-gallery-grid";
+import { FileListView } from "@/components/dashboard/file-list-view";
 import { getItemsByType, getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getFavoriteCollections } from "@/lib/db/collections";
 import { typeIcons, typeDisplayNames, getIconWithColor } from "@/lib/constants";
@@ -69,6 +70,8 @@ export default async function ItemsByTypePage({ params }: PageProps) {
         <ItemDrawerController>
           {typeParam.toLowerCase() === "image" ? (
             <ImageGalleryGrid items={items} />
+          ) : typeParam.toLowerCase() === "file" ? (
+            <FileListView items={items} />
           ) : (
             <DashboardItemsGrid items={items} />
           )}
