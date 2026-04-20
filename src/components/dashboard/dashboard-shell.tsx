@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sidebar, MobileSidebar } from "@/components/dashboard/sidebar";
 import { CreateItemModal } from "./create-item-modal";
+import { CreateCollectionModal } from "./create-collection-modal";
 import type { SystemItemType } from "@/lib/db/items";
 import type { CollectionWithTypes } from "@/lib/db/collections";
 import type { ItemWithType } from "@/lib/db/items";
@@ -24,6 +25,7 @@ export function DashboardShell({
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen flex-col">
@@ -50,6 +52,12 @@ export function DashboardShell({
         >
           New
         </button>
+        <button
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-2"
+          onClick={() => setCreateCollectionModalOpen(true)}
+        >
+          Collection
+        </button>
       </header>
       <div className="flex flex-1 overflow-hidden">
         <div className="hidden md:block">
@@ -64,6 +72,7 @@ export function DashboardShell({
         </main>
       </div>
       <CreateItemModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      <CreateCollectionModal open={createCollectionModalOpen} onOpenChange={setCreateCollectionModalOpen} />
     </div>
   );
 }

@@ -129,3 +129,23 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
 
   return { totalItems, totalCollections, favoriteItems, favoriteCollections };
 }
+
+export interface CreateCollectionInput {
+  name: string;
+  description: string | null;
+}
+
+export async function createCollection(
+  userId: string,
+  data: CreateCollectionInput
+): Promise<{ id: string }> {
+  const collection = await prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      userId,
+    },
+  });
+
+  return { id: collection.id };
+}
