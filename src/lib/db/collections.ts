@@ -149,3 +149,19 @@ export async function createCollection(
 
   return { id: collection.id };
 }
+
+export interface CollectionBasic {
+  id: string;
+  name: string;
+}
+
+export async function getCollections(userId: string): Promise<CollectionBasic[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+}

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
-import { createCollection as dbCreateCollection } from "@/lib/db/collections";
+import { createCollection as dbCreateCollection, getCollections as dbGetCollections } from "@/lib/db/collections";
 
 const createCollectionSchema = z.object({
   name: z
@@ -59,4 +59,12 @@ export async function createCollection(
     console.error("Failed to create collection:", error);
     return { success: false, error: "Failed to create collection" };
   }
+}
+
+export async function getCollections(): Promise<{ id: string; name: string }[]> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return [];
+  }
+  return dbGetCollections(session.user.id);
 }

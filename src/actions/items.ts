@@ -20,6 +20,7 @@ const createItemSchema = z.object({
   language: z.string().nullable().optional(),
   typeId: z.string().min(1, "Type is required"),
   tags: z.array(z.string().min(1).transform((v) => v.trim())).default([]),
+  collectionIds: z.array(z.string()).default([]),
   fileUrl: z.string().nullable().optional(),
   fileName: z.string().nullable().optional(),
   fileSize: z.number().nullable().optional(),
@@ -68,6 +69,7 @@ export async function createItem(data: unknown): Promise<CreateItemResult> {
       language: parsed.data.language ?? null,
       typeId: parsed.data.typeId,
       tags: parsed.data.tags,
+      collectionIds: parsed.data.collectionIds,
       fileUrl: parsed.data.fileUrl ?? null,
       fileName: parsed.data.fileName ?? null,
       fileSize: parsed.data.fileSize ?? null,
@@ -99,6 +101,7 @@ const updateItemSchema = z.object({
     .transform((v) => (v === "" ? null : v)),
   language: z.string().nullable().optional(),
   tags: z.array(z.string().min(1).transform((v) => v.trim())).default([]),
+  collectionIds: z.array(z.string()).default([]),
 });
 
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;
@@ -172,6 +175,7 @@ export async function updateItem(
       url: parsed.data.url ?? null,
       language: parsed.data.language ?? null,
       tags: parsed.data.tags,
+      collectionIds: parsed.data.collectionIds,
     };
     const result = await dbUpdateItem(session.user.id, itemId, dbData);
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createItem, getItemTypes } from "@/actions/items";
+import { getCollections } from "@/actions/collections";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { toast } from "sonner";
 import { ItemTypeSelect } from "./item-type-select";
 import { ContentEditor, FileField, UrlField } from "./item-form-fields";
@@ -40,6 +48,7 @@ interface FileData {
 export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const router = useRouter();
   const [itemTypes, setItemTypes] = useState<SystemItemType[]>([]);
+  const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedTypeName, setSelectedTypeName] = useState<string>("");
   const [title, setTitle] = useState("");
@@ -48,6 +57,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const [language, setLanguage] = useState("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState("");
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [fileData, setFileData] = useState<FileData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,6 +66,12 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
       getItemTypes().then(setItemTypes);
     }
   }, [open, itemTypes.length]);
+
+  useEffect(() => {
+    if (open && collections.length === 0) {
+      getCollections().then(setCollections);
+    }
+  }, [open, collections.length]);
 
   const resetForm = () => {
     setSelectedType("");
@@ -66,6 +82,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
     setLanguage("");
     setUrl("");
     setTags("");
+    setSelectedCollections([]);
     setFileData(null);
   };
 
@@ -119,6 +136,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
           .split(",")
           .map((t) => t.trim())
           .filter((t) => t.length > 0),
+        collectionIds: selectedCollections,
         fileUrl: fileData?.url || null,
         fileName: fileData?.fileName || null,
         fileSize: fileData?.fileSize || null,
@@ -226,6 +244,56 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
                 placeholder="Comma-separated tags"
               />
             </div>
+
+            {collections.length > 0 && (
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">Collections</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="col-span-3 justify-between font-normal"
+                    >
+                      {selectedCollections.length === 0
+                        ? "Select collections"
+                        : `${selectedCollections.length} collection${selectedCollections.length > 1 ? "s" : ""} selected`}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] max-h-[300px] overflow-y-auto p-0" align="start">
+                    <Command>
+                      <CommandEmpty>No collections found.</CommandEmpty>
+                      <CommandGroup>
+                        {collections.map((collection) => (
+                          <CommandItem
+                            key={collection.id}
+                            value={collection.name}
+                            onSelect={() => {
+                              if (selectedCollections.includes(collection.id)) {
+                                setSelectedCollections(
+                                  selectedCollections.filter((id) => id !== collection.id)
+                                );
+                              } else {
+                                setSelectedCollections([...selectedCollections, collection.id]);
+                              }
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                selectedCollections.includes(collection.id)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            />
+                            {collection.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button

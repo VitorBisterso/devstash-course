@@ -16,6 +16,7 @@ export interface CreateItemInput {
   language: string | null;
   typeId: string;
   tags: string[];
+  collectionIds?: string[];
   fileUrl?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
@@ -42,6 +43,11 @@ export async function createItem(
     });
   });
 
+  const collectionLinks =
+    data.collectionIds?.map((collectionId) => ({
+      collectionId,
+    })) ?? [];
+
   const result = await prisma.$transaction(async (tx) => {
     const tagRecords = await Promise.all(tagCreations);
 
@@ -66,6 +72,15 @@ export async function createItem(
         data: {
           itemId: item.id,
           tagId: tag.id,
+        },
+      });
+    }
+
+    for (const link of collectionLinks) {
+      await tx.itemCollection.create({
+        data: {
+          itemId: item.id,
+          collectionId: link.collectionId,
         },
       });
     }
@@ -305,6 +320,7 @@ export interface UpdateItemInput {
   url: string | null;
   language: string | null;
   tags: string[];
+  collectionIds?: string[];
   fileUrl?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
@@ -341,6 +357,11 @@ export async function updateItem(
     });
   });
 
+  const collectionLinks =
+    data.collectionIds?.map((collectionId) => ({
+      collectionId,
+    })) ?? [];
+
   const result = await prisma.$transaction(async (tx) => {
     await tx.itemTag.deleteMany({ where: { itemId } });
 
@@ -362,6 +383,17 @@ export async function updateItem(
         data: {
           itemId,
           tagId: tag.id,
+        },
+      });
+    }
+
+    await tx.itemCollection.deleteMany({ where: { itemId } });
+
+    for (const link of collectionLinks) {
+      await tx.itemCollection.create({
+        data: {
+          itemId,
+          collectionId: link.collectionId,
         },
       });
     }

@@ -22,6 +22,7 @@ import {
   ItemDrawerContent,
 } from "./item-drawer-content";
 import { ItemDrawerEditForm } from "./item-drawer-edit-form";
+import { getCollections } from "@/actions/collections";
 
 interface ItemDrawerProps {
   itemId: string | null;
@@ -35,6 +36,7 @@ interface EditFormData {
   url: string;
   language: string;
   tags: string;
+  collectionIds: string[];
 }
 
 export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
@@ -53,7 +55,15 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     url: "",
     language: "",
     tags: "",
+    collectionIds: [],
   });
+  const [allCollections, setAllCollections] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    if (editMode && allCollections.length === 0) {
+      getCollections().then(setAllCollections);
+    }
+  }, [editMode, allCollections.length]);
 
   useEffect(() => {
     if (!itemId) {
@@ -89,6 +99,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
         url: item.url || "",
         language: item.language || "",
         tags: item.tags.join(", "),
+        collectionIds: item.collections.map((c) => c.id),
       });
     }
   }, [item, editMode]);
@@ -163,6 +174,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
         url: typeField === "url" ? (formData.url || null) : null,
         language: isCodeType(item.type.name) ? (formData.language || null) : null,
         tags,
+        collectionIds: formData.collectionIds,
       });
 
       if (result.success && result.data) {
@@ -204,6 +216,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 <ItemDrawerEditForm
                   item={item}
                   formData={formData}
+                  collections={allCollections}
                   typeSpecificField={typeSpecificField}
                   saving={saving}
                   onFormDataChange={handleFormDataChange}

@@ -3,7 +3,13 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Loader2, Save, X, Check, ChevronsUpDown } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
 import { isCodeType } from "@/lib/item-types";
@@ -16,11 +22,13 @@ interface EditFormData {
   url: string;
   language: string;
   tags: string;
+  collectionIds: string[];
 }
 
 interface ItemDrawerEditFormProps {
   item: ItemDetail;
   formData: EditFormData;
+  collections: { id: string; name: string }[];
   typeSpecificField: "content" | "url" | "none";
   saving: boolean;
   onFormDataChange: (data: Partial<EditFormData>) => void;
@@ -31,6 +39,7 @@ interface ItemDrawerEditFormProps {
 export function ItemDrawerEditForm({
   item,
   formData,
+  collections,
   typeSpecificField,
   saving,
   onFormDataChange,
@@ -55,6 +64,63 @@ export function ItemDrawerEditForm({
           Separate tags with commas
         </p>
       </div>
+
+      {collections.length > 0 && (
+        <div>
+          <Label className="mb-1 block">Collections</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between font-normal"
+              >
+                {formData.collectionIds.length === 0
+                  ? "Select collections"
+                  : `${formData.collectionIds.length} collection${formData.collectionIds.length > 1 ? "s" : ""} selected`}
+                <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0" align="start">
+              <Command>
+                <CommandEmpty>No collections found.</CommandEmpty>
+                <CommandGroup>
+                  {collections.map((collection) => (
+                    <CommandItem
+                      key={collection.id}
+                      value={collection.name}
+                      onSelect={() => {
+                        if (formData.collectionIds.includes(collection.id)) {
+                          onFormDataChange({
+                            collectionIds: formData.collectionIds.filter(
+                              (id) => id !== collection.id
+                            ),
+                          });
+                        } else {
+                          onFormDataChange({
+                            collectionIds: [
+                              ...formData.collectionIds,
+                              collection.id,
+                            ],
+                          });
+                        }
+                      }}
+                    >
+                      <Check
+                        className={`mr-2 h-4 w-4 ${
+                          formData.collectionIds.includes(collection.id)
+                            ? "opacity-100"
+                            : "opacity-0"
+                        }`}
+                      />
+                      {collection.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
       {showContentEditor && (
         <div>
