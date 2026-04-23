@@ -10,6 +10,7 @@ export interface CollectionItemType {
 export interface CollectionWithTypes {
   id: string;
   name: string;
+  description: string | null;
   isFavorite: boolean;
   itemCount: number;
   itemTypes: CollectionItemType[];
@@ -58,7 +59,13 @@ async function getTypeAggregationsForCollections(collectionIds: string[]): Promi
 }
 
 function buildCollectionWithTypes(
-  collection: { id: string; name: string; isFavorite: boolean; _count: { items: number } },
+  collection: {
+    id: string;
+    name: string;
+    description?: string | null;
+    isFavorite: boolean;
+    _count: { items: number };
+  },
   typeAggregations: Map<string, { count: number; type: CollectionItemType }[]>
 ): CollectionWithTypes {
   const typeEntries = typeAggregations.get(collection.id) ?? [];
@@ -67,6 +74,7 @@ function buildCollectionWithTypes(
   return {
     id: collection.id,
     name: collection.name,
+    description: collection.description ?? null,
     isFavorite: collection.isFavorite,
     itemCount: collection._count.items,
     itemTypes: sorted.map((t) => t.type),
@@ -209,4 +217,70 @@ export async function getCollectionById(
     collection.id,
   ]);
   return buildCollectionWithTypes(collection, typeAggregations);
+}
+
+export interface UpdateCollectionInput {
+  name: string;
+  description: string | null;
+}
+
+export async function updateCollection(
+  userId: string,
+  collectionId: string,
+  data: UpdateCollectionInput
+): Promise<{ id: string } | null> {
+  const collection = await prisma.collection.update({
+    where: { id: collectionId, userId },
+    data: {
+      name: data.name,
+      description: data.description,
+    },
+  });
+
+  return { id: collection.id };
+}
+
+export async function deleteCollection(
+  userId: string,
+  collectionId: string
+): Promise<boolean> {
+  await prisma.itemCollection.deleteMany({ where: { collectionId } });
+  await prisma.collection.delete({ where: { id: collectionId, userId } });
+
+  return true;
+}
+
+export async function removeItemFromCollection(
+  userId: string,
+  collectionId: string,
+  itemId: string
+): Promise<boolean> {
+  await prisma.itemCollection.deleteMany({
+    where: {
+      collectionId,
+      item: { userId },
+      itemId,
+    },
+  });
+
+  return true;
+}
+
+export async function toggleCollectionFavorite(
+  userId: string,
+  collectionId: string
+): Promise<boolean | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { isFavorite: true },
+  });
+
+  if (!collection) return null;
+
+  const updated = await prisma.collection.update({
+    where: { id: collectionId, userId },
+    data: { isFavorite: !collection.isFavorite },
+  });
+
+  return updated.isFavorite;
 }

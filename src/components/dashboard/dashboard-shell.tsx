@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Sidebar, MobileSidebar } from "@/components/dashboard/sidebar";
 import { CreateItemModal } from "./create-item-modal";
 import { CreateCollectionModal } from "./create-collection-modal";
@@ -34,10 +35,10 @@ export function DashboardShell({
           <MobileSidebar data={sidebarData} />
         </div>
         <div className="flex items-center gap-3 flex-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
+          <Link href="/dashboard" className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
             <span className="text-primary-foreground text-sm font-bold">D</span>
-          </div>
-          <span className="font-semibold hidden sm:inline">DevStash</span>
+          </Link>
+          <Link href="/dashboard" className="font-semibold hidden sm:inline">DevStash</Link>
           <div className="relative flex-1 max-w-md ml-auto">
             <input
               type="search"

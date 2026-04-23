@@ -1,23 +1,15 @@
 # Current Feature
-Collections Pages
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
-
-- Create `/collections` page to show all collections
-- Create `/collections/[id]` page to show items in a collection
-- Use existing collection cards
-- Link "View all collections" in sidebar to `/collections`
-- Link collection cards to their specific collection pages
 
 ## Notes
 
 ## History
 
-- **2026-03-18**: Started Dashboard UI Phase 1 implementation.
 - **2026-03-18**: Completed Dashboard UI Phase 1 with ShadCN UI initialization, dark mode, dashboard route, top bar, and placeholder layout.
 - **2026-03-18**: Completed Dashboard UI Phase 2 with collapsible sidebar, item types with links, favorite collections, recent items, user avatar, mobile drawer, DevStash logo in header, and colored type icons.
 - **2026-03-19**: Completed Dashboard UI Phase 3 with stats cards, recent collections, pinned items, recent items and scrollable main area.
@@ -55,3 +47,5 @@ In Progress
 - **2026-04-15**: Completed Code Refactoring - split large components into smaller, reusable pieces: extracted formatFileSize to src/lib/format.ts, TYPE_SPECIFIC_FIELDS to src/lib/item-types.ts, file icon mapping to src/lib/file-icons.ts, created shared auth components (AuthCard, ErrorAlert, OAuthButtons, FormField, PasswordField, LinkPrompt), split sidebar.tsx into sidebar-sections.tsx with SidebarItems/SidebarCollections/SidebarRecent, split item-drawer.tsx into item-drawer-header.tsx/item-drawer-content.tsx/item-drawer-edit-form.tsx, split create-item-modal.tsx into item-type-select.tsx/item-form-fields.tsx.
 - **2026-04-20**: Completed Collection Create - added "Collection" button in top bar, create collection modal with name and description fields, createCollection server action with Zod validation, toast notifications on success/error, and router.refresh() after save. Added unit tests for createCollection.
 - **2026-04-20**: Completed Add Item to Collection - added collection multi-select dropdown to create-item-modal and item-drawer edit form, added getCollections action, updated createItem and updateItem to accept collectionIds, switched to radix-ui popover.
+- **2026-04-23**: Completed Collections Pages - created `/collections` and `/collections/[id]` pages with item listing, CollectionCard component, database functions for getting collections with details and items by collection.
+- **2026-04-23**: Completed Collection Buttons - added edit, delete, and favorite buttons on /collections/[id] page with edit modal and delete confirmation. Added 3-dot dropdown to CollectionCard at /collections and dashboard with edit, delete, and favorite options. Clicking card navigates to collection page.
