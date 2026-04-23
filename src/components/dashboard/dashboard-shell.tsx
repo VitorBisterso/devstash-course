@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Sidebar, MobileSidebar } from "@/components/dashboard/sidebar";
 import { CreateItemModal } from "./create-item-modal";
 import { CreateCollectionModal } from "./create-collection-modal";
+import { GlobalSearch } from "./global-search";
+import { SearchDrawerProvider, useSearchDrawer } from "./search-drawer-context";
 import type { SystemItemType } from "@/lib/db/items";
 import type { CollectionWithTypes } from "@/lib/db/collections";
 import type { ItemWithType } from "@/lib/db/items";
+import type { SearchData } from "@/lib/db/search";
 
 export interface SidebarData {
   itemTypes: SystemItemType[];
@@ -17,16 +20,22 @@ export interface SidebarData {
   userEmail: string;
 }
 
+interface DashboardShellProps {
+  children: React.ReactNode;
+  sidebarData: SidebarData;
+  searchData?: SearchData | null;
+}
+
 export function DashboardShell({
   children,
   sidebarData,
-}: {
-  children: React.ReactNode;
-  sidebarData: SidebarData;
-}) {
+  searchData,
+}: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const { setOpenItemId } = useSearchDrawer();
 
   return (
     <div className="flex h-screen flex-col">
@@ -39,13 +48,15 @@ export function DashboardShell({
             <span className="text-primary-foreground text-sm font-bold">D</span>
           </Link>
           <Link href="/dashboard" className="font-semibold hidden sm:inline">DevStash</Link>
-          <div className="relative flex-1 max-w-md ml-auto">
-            <input
-              type="search"
-              placeholder="Search..."
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8"
-            />
-          </div>
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="relative flex-1 max-w-md ml-auto flex h-9 items-center rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground cursor-text"
+          >
+            <span className="text-muted-foreground mr-2">Search...</span>
+            <kbd className="ml-auto text-xs text-muted-foreground border border-input bg-background px-1.5 py-0.5 rounded">
+              ⌘K
+            </kbd>
+          </button>
         </div>
         <button
           className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 gap-2"
@@ -74,6 +85,18 @@ export function DashboardShell({
       </div>
       <CreateItemModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
       <CreateCollectionModal open={createCollectionModalOpen} onOpenChange={setCreateCollectionModalOpen} />
+      <GlobalSearch searchData={searchData} open={searchOpen} onOpenChange={setSearchOpen} onItemSelect={setOpenItemId} />
     </div>
+  );
+}
+
+export function DashboardShellWrapper(props: DashboardShellProps & { children: React.ReactNode }) {
+  const { searchData, ...rest } = props;
+  return (
+    <SearchDrawerProvider>
+      <DashboardShell {...rest} searchData={searchData ?? null}>
+        {props.children}
+      </DashboardShell>
+    </SearchDrawerProvider>
   );
 }

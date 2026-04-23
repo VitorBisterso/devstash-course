@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { DashboardItemsGrid } from "@/components/dashboard/dashboard-items-grid";
 import { ImageGalleryGrid } from "@/components/dashboard/image-gallery-grid";
 import { FileListView } from "@/components/dashboard/file-list-view";
 import { getItemsByType, getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getFavoriteCollections } from "@/lib/db/collections";
+import { getSearchData } from "@/lib/db/search";
 import { typeIcons, typeDisplayNames, getIconWithColor } from "@/lib/constants";
 
 interface PageProps {
@@ -25,11 +26,12 @@ export default async function ItemsByTypePage({ params }: PageProps) {
   const { type: typeParam } = await params;
   const typeName = typeParam.charAt(0).toUpperCase() + typeParam.slice(1).toLowerCase();
 
-  const [items, itemTypes, favoriteCollections, recentItems] = await Promise.all([
+  const [items, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
     getItemsByType(session.user.id, typeName),
     getSystemItemTypes(),
     getFavoriteCollections(session.user.id),
     getRecentItems(session.user.id, 5),
+    getSearchData(session.user.id),
   ]);
 
   const sidebarData = {
@@ -46,7 +48,7 @@ export default async function ItemsByTypePage({ params }: PageProps) {
   );
 
   return (
-    <DashboardShell sidebarData={sidebarData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           {currentType && (
@@ -77,6 +79,6 @@ export default async function ItemsByTypePage({ params }: PageProps) {
           )}
         </ItemDrawerController>
       </div>
-    </DashboardShell>
+    </DashboardShellWrapper>
   );
 }
