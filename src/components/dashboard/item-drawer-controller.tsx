@@ -2,6 +2,7 @@
 
 import { useState, createContext, useContext, ReactNode } from "react";
 import { ItemDrawer } from "./item-drawer";
+import { useSearchDrawer } from "./search-drawer-context";
 
 interface ItemDrawerControllerProps {
   children: ReactNode;
@@ -16,28 +17,25 @@ const DrawerContext = createContext<DrawerContextValue>({
 });
 
 export function ItemDrawerController({ children }: ItemDrawerControllerProps) {
-  return (
-    <ItemDrawerControllerInner>
-      {children}
-    </ItemDrawerControllerInner>
-  );
-}
+  const [internalOpenItemId, setInternalOpenItemId] = useState<string | null>(null);
+  const { openItemId, setOpenItemId: setContextOpenItemId } = useSearchDrawer();
 
-function ItemDrawerControllerInner({ children }: ItemDrawerControllerProps) {
-  const [openItemId, setOpenItemId] = useState<string | null>(null);
+  const effectiveItemId = internalOpenItemId ?? openItemId;
 
   const handleItemClick = (itemId: string) => {
-    setOpenItemId(itemId);
+    setInternalOpenItemId(itemId);
+    setContextOpenItemId(null);
   };
 
   const handleClose = () => {
-    setOpenItemId(null);
+    setInternalOpenItemId(null);
+    setContextOpenItemId(null);
   };
 
   return (
     <DrawerContext.Provider value={{ onItemClick: handleItemClick }}>
       {children}
-      <ItemDrawer itemId={openItemId} onClose={handleClose} />
+      <ItemDrawer itemId={effectiveItemId} onClose={handleClose} />
     </DrawerContext.Provider>
   );
 }

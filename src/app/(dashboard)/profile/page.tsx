@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { getUserProfile, getUserStats, getUserAuthMethods } from "@/lib/db/profile";
 import { ProfileStats } from "@/components/profile/profile-stats";
 import { ProfileActions } from "@/components/profile/profile-actions";
 import { getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getFavoriteCollections } from "@/lib/db/collections";
+import { getSearchData } from "@/lib/db/search";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -15,13 +16,14 @@ export default async function ProfilePage() {
     redirect("/api/auth/signin");
   }
 
-  const [profile, stats, authMethods, itemTypes, favoriteCollections, recentItems] = await Promise.all([
+  const [profile, stats, authMethods, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),
     getUserAuthMethods(session.user.id),
     getSystemItemTypes(),
     getFavoriteCollections(session.user.id),
     getRecentItems(session.user.id, 5),
+    getSearchData(session.user.id),
   ]);
 
   if (!profile) {
@@ -48,7 +50,7 @@ export default async function ProfilePage() {
   };
 
   return (
-    <DashboardShell sidebarData={sidebarData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <div className="space-y-8 max-w-2xl">
         <div>
           <h1 className="text-2xl font-bold">Profile</h1>
@@ -80,6 +82,6 @@ export default async function ProfilePage() {
           hasPassword={authMethods.hasPassword}
         />
       </div>
-    </DashboardShell>
+    </DashboardShellWrapper>
   );
 }

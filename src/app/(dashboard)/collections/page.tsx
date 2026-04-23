@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { CollectionCard } from "@/components/dashboard/collection-card";
 import { getCollectionsWithDetails, getFavoriteCollections } from "@/lib/db/collections";
 import { getRecentItems, getSystemItemTypes } from "@/lib/db/items";
+import { getSearchData } from "@/lib/db/search";
 
 export default async function CollectionsPage() {
   const session = await auth();
@@ -15,11 +16,12 @@ export default async function CollectionsPage() {
 
   const userId = session.user.id;
 
-  const [collections, itemTypes, favoriteCollections, recentItems] = await Promise.all([
+  const [collections, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
     getCollectionsWithDetails(userId),
     getSystemItemTypes(),
     getFavoriteCollections(userId),
     getRecentItems(userId, 5),
+    getSearchData(userId),
   ]);
 
   const sidebarData = {
@@ -32,7 +34,7 @@ export default async function CollectionsPage() {
   };
 
   return (
-    <DashboardShell sidebarData={sidebarData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <ItemDrawerController>
         <div className="space-y-6">
           <div>
@@ -55,6 +57,6 @@ export default async function CollectionsPage() {
           )}
         </div>
       </ItemDrawerController>
-    </DashboardShell>
+    </DashboardShellWrapper>
   );
 }

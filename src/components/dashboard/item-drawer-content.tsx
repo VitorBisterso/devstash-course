@@ -68,9 +68,7 @@ export function ItemDrawerActions({
       <div className="flex-1" />
       <AlertDialog open={deleteOpen} onOpenChange={onDeleteOpenChange}>
         <AlertDialogTrigger>
-          <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+          <Trash2 className="h-4 w-4 text-destructive" />
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { DashboardItemsGrid } from "@/components/dashboard/dashboard-items-grid";
 import { ImageGalleryGrid } from "@/components/dashboard/image-gallery-grid";
@@ -9,6 +9,7 @@ import { FileListView } from "@/components/dashboard/file-list-view";
 import { CollectionActions } from "@/components/dashboard/collection-actions";
 import { getCollectionById, getFavoriteCollections } from "@/lib/db/collections";
 import { getItemsByCollection, getRecentItems, getSystemItemTypes } from "@/lib/db/items";
+import { getSearchData } from "@/lib/db/search";
 import { FolderOpen, Star } from "lucide-react";
 
 interface PageProps {
@@ -27,12 +28,13 @@ export default async function CollectionDetailPage({ params }: PageProps) {
   const { id: collectionId } = await params;
   const userId = session.user.id;
 
-  const [collection, itemTypes, favoriteCollections, recentItems, items] = await Promise.all([
+  const [collection, itemTypes, favoriteCollections, recentItems, items, searchData] = await Promise.all([
     getCollectionById(userId, collectionId),
     getSystemItemTypes(),
     getFavoriteCollections(userId),
     getRecentItems(userId, 5),
     getItemsByCollection(userId, collectionId),
+    getSearchData(userId),
   ]);
 
   if (!collection) {
@@ -51,7 +53,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
   const dominantTypeName = collection.itemTypes[0]?.name.toLowerCase();
 
   return (
-    <DashboardShell sidebarData={sidebarData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <ItemDrawerController>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -97,6 +99,6 @@ export default async function CollectionDetailPage({ params }: PageProps) {
           )}
         </div>
       </ItemDrawerController>
-    </DashboardShell>
+    </DashboardShellWrapper>
   );
 }
