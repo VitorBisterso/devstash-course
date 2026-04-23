@@ -1,10 +1,17 @@
 # Current Feature
+Collections Pages
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
+
+- Create `/collections` page to show all collections
+- Create `/collections/[id]` page to show items in a collection
+- Use existing collection cards
+- Link "View all collections" in sidebar to `/collections`
+- Link collection cards to their specific collection pages
 
 ## Notes
 

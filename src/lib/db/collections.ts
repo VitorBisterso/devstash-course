@@ -165,3 +165,48 @@ export async function getCollections(userId: string): Promise<CollectionBasic[]>
     },
   });
 }
+
+export async function getCollectionsWithDetails(
+  userId: string
+): Promise<CollectionWithTypes[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      isFavorite: true,
+      _count: { select: { items: true } },
+    },
+  });
+
+  if (collections.length === 0) return [];
+
+  const typeAggregations = await getTypeAggregationsForCollections(
+    collections.map((c) => c.id)
+  );
+  return collections.map((c) => buildCollectionWithTypes(c, typeAggregations));
+}
+
+export async function getCollectionById(
+  userId: string,
+  collectionId: string
+): Promise<CollectionWithTypes | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isFavorite: true,
+      _count: { select: { items: true } },
+    },
+  });
+
+  if (!collection) return null;
+
+  const typeAggregations = await getTypeAggregationsForCollections([
+    collection.id,
+  ]);
+  return buildCollectionWithTypes(collection, typeAggregations);
+}

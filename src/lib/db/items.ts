@@ -225,6 +225,33 @@ export async function getItemsByType(userId: string, typeName: string): Promise<
   });
 }
 
+export async function getItemsByCollection(
+  userId: string,
+  collectionId: string
+): Promise<ItemWithType[]> {
+  return prisma.item.findMany({
+    where: {
+      userId,
+      collections: {
+        some: {
+          collectionId,
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      type: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true,
+        },
+      },
+    },
+  });
+}
+
 export interface ItemDetail {
   id: string;
   title: string;
