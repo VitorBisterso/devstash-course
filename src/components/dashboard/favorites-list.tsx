@@ -7,6 +7,9 @@ import Link from "next/link";
 import { Star, Clock } from "lucide-react";
 import { getIconWithColor, typeIconsSmall } from "@/lib/constants";
 import { formatFileSize } from "@/lib/format";
+import { useState, useMemo } from "react";
+import { SortButton } from "./sort-button";
+import { type SortField, type SortOrder } from "@/types/sort";
 
 interface FavoritesListProps {
   items: ItemWithType[];
@@ -83,15 +86,62 @@ function CollectionRow({ collection }: { collection: CollectionWithTypes }) {
       </div>
       <div className="col-span-1 md:col-span-2 flex items-center text-xs text-muted-foreground">
         <Clock className="h-3 w-3 mr-1" />
-        {formatDate(new Date())}
+        {formatDate(collection.updatedAt)}
       </div>
     </Link>
   );
 }
 
 export function FavoritesList({ items, collections }: FavoritesListProps) {
-  const hasItems = items.length > 0;
-  const hasCollections = collections.length > 0;
+  const [itemsSortField, setItemsSortField] = useState<SortField>("date");
+  const [itemsSortOrder, setItemsSortOrder] = useState<SortOrder>("desc");
+  const [collectionsSortField, setCollectionsSortField] = useState<SortField>("date");
+  const [collectionsSortOrder, setCollectionsSortOrder] = useState<SortOrder>("desc");
+
+  const sortedItems = useMemo(() => {
+    const sorted = [...items];
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      if (itemsSortField === "name") {
+        comparison = a.title.localeCompare(b.title);
+      } else if (itemsSortField === "date") {
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      } else if (itemsSortField === "type") {
+        comparison = a.type.name.localeCompare(b.type.name);
+      }
+      return itemsSortOrder === "asc" ? comparison : -comparison;
+    });
+    return sorted;
+  }, [items, itemsSortField, itemsSortOrder]);
+
+  const sortedCollections = useMemo(() => {
+    const sorted = [...collections];
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      if (collectionsSortField === "name") {
+        comparison = a.name.localeCompare(b.name);
+      } else if (collectionsSortField === "date") {
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      } else if (collectionsSortField === "type") {
+        const aTypes = a.itemTypes.map(t => t.name).join(", ");
+        const bTypes = b.itemTypes.map(t => t.name).join(", ");
+        comparison = aTypes.localeCompare(bTypes);
+      }
+      return collectionsSortOrder === "asc" ? comparison : -comparison;
+    });
+    return sorted;
+  }, [collections, collectionsSortField, collectionsSortOrder]);
+
+  const toggleItemsSortOrder = () => {
+    setItemsSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  };
+
+  const toggleCollectionsSortOrder = () => {
+    setCollectionsSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  };
+
+  const hasItems = sortedItems.length > 0;
+  const hasCollections = sortedCollections.length > 0;
 
   if (!hasItems && !hasCollections) {
     return (
@@ -117,13 +167,13 @@ export function FavoritesList({ items, collections }: FavoritesListProps) {
           </div>
           <div className="rounded-lg border bg-card overflow-hidden">
             <div className="hidden md:grid grid-cols-12 gap-4 px-3 py-2 bg-muted/30 border-b border-border/50 text-xs font-medium text-muted-foreground font-mono">
-              <div className="col-span-5">Name</div>
-              <div className="col-span-3">Type</div>
+              <div className="col-span-5"><SortButton field="name" label="Name" sortField={itemsSortField} sortOrder={itemsSortOrder} onToggleSort={toggleItemsSortOrder} onSetField={setItemsSortField} /></div>
+              <div className="col-span-3"><SortButton field="type" label="Type" sortField={itemsSortField} sortOrder={itemsSortOrder} onToggleSort={toggleItemsSortOrder} onSetField={setItemsSortField} /></div>
               <div className="col-span-2">Size</div>
-              <div className="col-span-2">Modified</div>
+              <div className="col-span-2"><SortButton field="date" label="Modified" sortField={itemsSortField} sortOrder={itemsSortOrder} onToggleSort={toggleItemsSortOrder} onSetField={setItemsSortField} /></div>
             </div>
             <div className="divide-y divide-border/50">
-              {items.map((item) => (
+              {sortedItems.map((item) => (
                 <ItemRow key={item.id} item={item} />
               ))}
             </div>
@@ -141,13 +191,13 @@ export function FavoritesList({ items, collections }: FavoritesListProps) {
           </div>
           <div className="rounded-lg border bg-card overflow-hidden">
             <div className="hidden md:grid grid-cols-12 gap-4 px-3 py-2 bg-muted/30 border-b border-border/50 text-xs font-medium text-muted-foreground font-mono">
-              <div className="col-span-5">Name</div>
-              <div className="col-span-3">Types</div>
+              <div className="col-span-5"><SortButton field="name" label="Name" sortField={collectionsSortField} sortOrder={collectionsSortOrder} onToggleSort={toggleCollectionsSortOrder} onSetField={setCollectionsSortField} /></div>
+              <div className="col-span-3"><SortButton field="type" label="Types" sortField={collectionsSortField} sortOrder={collectionsSortOrder} onToggleSort={toggleCollectionsSortOrder} onSetField={setCollectionsSortField} /></div>
               <div className="col-span-2">Items</div>
-              <div className="col-span-2">Modified</div>
+              <div className="col-span-2"><SortButton field="date" label="Modified" sortField={collectionsSortField} sortOrder={collectionsSortOrder} onToggleSort={toggleCollectionsSortOrder} onSetField={setCollectionsSortField} /></div>
             </div>
             <div className="divide-y divide-border/50">
-              {collections.map((collection) => (
+              {sortedCollections.map((collection) => (
                 <CollectionRow key={collection.id} collection={collection} />
               ))}
             </div>

@@ -2,7 +2,7 @@
 
 ## Status
 
-Not started
+Not Started
 
 ## Goals
 
@@ -55,3 +55,4 @@ Not started
 - **2026-05-04**: Completed Editor Preferences Settings - added editor preferences section to settings page with font size, tab size, word wrap, minimap, and theme dropdowns. Store preferences in JSON column on User model, auto-save on change with toast notifications, created EditorPreferencesContext for client components, and applied settings to Monaco Editor
 - **2026-05-04**: Completed Favorites Page - added star icon button to TopBar linking to /favorites, created /favorites route with protection, added getFavoriteItems database function in items.ts, created FavoritesList component with compact VS Code/terminal style list view (monospace font, minimal padding), separate sections for items and collections with counts, each row shows type icon, title, type badge, file size and date, click item opens ItemDrawer, click collection navigates to /collections/[id], and empty state when no favorites
 - **2026-05-04**: Completed Favorite Toggle Buttons - added toggleItemFavorite server action and database function, fixed item drawer favorite toggle (was using broken API, now uses server action), added router.refresh() to item drawer, collection actions, and collection cards to update parent page when toggling favorites
+- **2026-05-04**: Completed Favorites Client-Side Sorting - added client-side sorting to favorites page with sort by name (alphabetical), date (created/updated), and item type. Created SortButton component, sort types, and integrated sorting into FavoritesList component for both items and collections sections

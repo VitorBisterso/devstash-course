@@ -4,7 +4,7 @@ import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
 import { FavoritesList } from "@/components/dashboard/favorites-list";
 import { getFavoriteItems } from "@/lib/db/items";
-import { getFavoriteCollections, getRecentCollections } from "@/lib/db/collections";
+import { getFavoriteCollections } from "@/lib/db/collections";
 import { getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getSearchData } from "@/lib/db/search";
 
@@ -17,11 +17,10 @@ export default async function FavoritesPage() {
 
   const userId = session.user.id;
 
-  const [favoriteItems, favoriteCollections, itemTypes, recentCollections, recentItems, searchData] = await Promise.all([
+  const [favoriteItems, favoriteCollections, itemTypes, recentItems, searchData] = await Promise.all([
     getFavoriteItems(userId),
     getFavoriteCollections(userId),
     getSystemItemTypes(),
-    getRecentCollections(userId, 5),
     getRecentItems(userId, 5),
     getSearchData(userId),
   ]);

@@ -15,6 +15,7 @@ export interface CollectionWithTypes {
   itemCount: number;
   itemTypes: CollectionItemType[];
   dominantColor: string | null;
+  updatedAt: Date;
 }
 
 interface TypeAggregationRow {
@@ -64,6 +65,7 @@ function buildCollectionWithTypes(
     name: string;
     description?: string | null;
     isFavorite: boolean;
+    updatedAt: Date;
     _count: { items: number };
   },
   typeAggregations: Map<string, { count: number; type: CollectionItemType }[]>
@@ -79,6 +81,7 @@ function buildCollectionWithTypes(
     itemCount: collection._count.items,
     itemTypes: sorted.map((t) => t.type),
     dominantColor: dominantType?.type.color ?? null,
+    updatedAt: collection.updatedAt,
   };
 }
 
@@ -91,6 +94,7 @@ export async function getRecentCollections(userId: string, limit = 6): Promise<C
       id: true,
       name: true,
       isFavorite: true,
+      updatedAt: true,
       _count: { select: { items: true } },
     },
   });
@@ -110,6 +114,7 @@ export async function getFavoriteCollections(userId: string): Promise<Collection
       id: true,
       name: true,
       isFavorite: true,
+      updatedAt: true,
       _count: { select: { items: true } },
     },
   });
@@ -190,12 +195,13 @@ export async function getCollectionsWithDetails(
       orderBy: { name: "asc" },
       skip,
       take,
-      select: {
-        id: true,
-        name: true,
-        isFavorite: true,
-        _count: { select: { items: true } },
-      },
+    select: {
+      id: true,
+      name: true,
+      isFavorite: true,
+      updatedAt: true,
+      _count: { select: { items: true } },
+    },
     }),
     prisma.collection.count({
       where: { userId },
@@ -224,6 +230,7 @@ export async function getCollectionById(
       name: true,
       description: true,
       isFavorite: true,
+      updatedAt: true,
       _count: { select: { items: true } },
     },
   });
