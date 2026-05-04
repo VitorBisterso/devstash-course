@@ -174,26 +174,43 @@ export async function getCollections(userId: string): Promise<CollectionBasic[]>
   });
 }
 
-export async function getCollectionsWithDetails(
-  userId: string
-): Promise<CollectionWithTypes[]> {
-  const collections = await prisma.collection.findMany({
-    where: { userId },
-    orderBy: { name: "asc" },
-    select: {
-      id: true,
-      name: true,
-      isFavorite: true,
-      _count: { select: { items: true } },
-    },
-  });
+export interface PaginatedCollections {
+  collections: CollectionWithTypes[];
+  totalCount: number;
+}
 
-  if (collections.length === 0) return [];
+export async function getCollectionsWithDetails(
+  userId: string,
+  skip = 0,
+  take = 21
+): Promise<PaginatedCollections> {
+  const [collections, totalCount] = await Promise.all([
+    prisma.collection.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      skip,
+      take,
+      select: {
+        id: true,
+        name: true,
+        isFavorite: true,
+        _count: { select: { items: true } },
+      },
+    }),
+    prisma.collection.count({
+      where: { userId },
+    }),
+  ]);
+
+  if (collections.length === 0) return { collections: [], totalCount: 0 };
 
   const typeAggregations = await getTypeAggregationsForCollections(
     collections.map((c) => c.id)
   );
-  return collections.map((c) => buildCollectionWithTypes(c, typeAggregations));
+  return {
+    collections: collections.map((c) => buildCollectionWithTypes(c, typeAggregations)),
+    totalCount,
+  };
 }
 
 export async function getCollectionById(

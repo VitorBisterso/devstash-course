@@ -1,12 +1,21 @@
-# Current Feature
+# Pagination
 
 ## Status
 
-Not Started
+Complete
 
 ## Goals
 
+- Add pagination to /items/[type] and /collections/[id] pages
+- Pagination controls at bottom with page numbers and prev/next links
+- Disable (grey out) prev/next when not available
+- Use constants: ITEMS_PER_PAGE = 21, COLLECTIONS_PER_PAGE = 21
+- Dashboard limits: DASHBOARD_COLLECTIONS_LIMIT = 6, DASHBOARD_RECENT_ITEMS_LIMIT = 10
+- Do not fetch all resources at once. Only fetch the amount that a page requires
+
 ## Notes
+
+Add pagination for items and collections listings with numbered page links.
 
 ## History
 
@@ -50,3 +59,4 @@ Not Started
 - **2026-04-23**: Completed Collections Pages - created `/collections` and `/collections/[id]` pages with item listing, CollectionCard component, database functions for getting collections with details and items by collection.
 - **2026-04-23**: Completed Collection Buttons - added edit, delete, and favorite buttons on /collections/[id] page with edit modal and delete confirmation. Added 3-dot dropdown to CollectionCard at /collections and dashboard with edit, delete, and favorite options. Clicking card navigates to collection page.
 - **2026-04-23**: Completed Global Search / Command Palette - added Cmd+K / Ctrl+K global search with fuzzy search across items and collections, grouped results (Items/Collections), keyboard navigation, top bar search input with ⌘K hint, uses shadcn cmdk component, client-side filtering, pre-fetched search data, and unit tests for getSearchData.
+- **2026-05-04**: Completed Pagination - added pagination to /items/[type] and /collections/[id] pages with page numbers and prev/next links (greyed out when unavailable), created Pagination component, updated DB functions with skip/take parameters, applied dashboard limits (6 collections, 10 recent items), used constants ITEMS_PER_PAGE=21 and COLLECTIONS_PER_PAGE=21.

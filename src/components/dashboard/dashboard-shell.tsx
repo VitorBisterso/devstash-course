@@ -23,7 +23,7 @@ export interface SidebarData {
 interface DashboardShellProps {
   children: React.ReactNode;
   sidebarData: SidebarData;
-  searchData?: SearchData | null;
+  searchData?: SearchData | null | undefined;
 }
 
 export function DashboardShell({
@@ -36,6 +36,8 @@ export function DashboardShell({
   const [createCollectionModalOpen, setCreateCollectionModalOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { setOpenItemId } = useSearchDrawer();
+
+  const safeSearchData = searchData ?? null;
 
   return (
     <div className="flex h-screen flex-col">
@@ -85,7 +87,7 @@ export function DashboardShell({
       </div>
       <CreateItemModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
       <CreateCollectionModal open={createCollectionModalOpen} onOpenChange={setCreateCollectionModalOpen} />
-      <GlobalSearch searchData={searchData} open={searchOpen} onOpenChange={setSearchOpen} onItemSelect={setOpenItemId} />
+      <GlobalSearch searchData={safeSearchData} open={searchOpen} onOpenChange={setSearchOpen} onItemSelect={setOpenItemId} />
     </div>
   );
 }

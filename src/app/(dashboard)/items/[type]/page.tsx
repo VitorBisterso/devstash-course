@@ -5,18 +5,20 @@ import { ItemDrawerController } from "@/components/dashboard/item-drawer-control
 import { DashboardItemsGrid } from "@/components/dashboard/dashboard-items-grid";
 import { ImageGalleryGrid } from "@/components/dashboard/image-gallery-grid";
 import { FileListView } from "@/components/dashboard/file-list-view";
+import { Pagination } from "@/components/pagination";
 import { getItemsByType, getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getFavoriteCollections } from "@/lib/db/collections";
 import { getSearchData } from "@/lib/db/search";
-import { typeIcons, typeDisplayNames, getIconWithColor } from "@/lib/constants";
+import { ITEMS_PER_PAGE, typeIcons, typeDisplayNames, getIconWithColor } from "@/lib/constants";
 
 interface PageProps {
   params: Promise<{
     type: string;
   }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function ItemsByTypePage({ params }: PageProps) {
+export default async function ItemsByTypePage({ params, searchParams }: PageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -24,15 +26,24 @@ export default async function ItemsByTypePage({ params }: PageProps) {
   }
 
   const { type: typeParam } = await params;
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10));
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const typeName = typeParam.charAt(0).toUpperCase() + typeParam.slice(1).toLowerCase();
 
-  const [items, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
-    getItemsByType(session.user.id, typeName),
+  const [result, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
+    getItemsByType(session.user.id, typeName, skip, ITEMS_PER_PAGE),
     getSystemItemTypes(),
     getFavoriteCollections(session.user.id),
     getRecentItems(session.user.id, 5),
     getSearchData(session.user.id),
   ]);
+
+  const safeSearchData = searchData ?? null;
+
+  const { items, totalCount } = result;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const sidebarData = {
     itemTypes,
@@ -48,7 +59,7 @@ export default async function ItemsByTypePage({ params }: PageProps) {
   );
 
   return (
-    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={safeSearchData}>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           {currentType && (
@@ -64,7 +75,7 @@ export default async function ItemsByTypePage({ params }: PageProps) {
               {typeDisplayNames[typeParam.toLowerCase()] || typeName}
             </h1>
             <p className="text-muted-foreground">
-              {items.length} {items.length === 1 ? "item" : "items"}
+              {totalCount} {totalCount === 1 ? "item" : "items"}
             </p>
           </div>
         </div>
@@ -78,6 +89,12 @@ export default async function ItemsByTypePage({ params }: PageProps) {
             <DashboardItemsGrid items={items} />
           )}
         </ItemDrawerController>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          baseUrl={`/items/${typeParam}`}
+        />
       </div>
     </DashboardShellWrapper>
   );

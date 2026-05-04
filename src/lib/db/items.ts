@@ -200,56 +200,101 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
   });
 }
 
-export async function getItemsByType(userId: string, typeName: string): Promise<ItemWithType[]> {
-  return prisma.item.findMany({
-    where: {
-      userId,
-      type: {
-        name: {
-          equals: typeName,
-          mode: "insensitive",
+export interface PaginatedItems {
+  items: ItemWithType[];
+  totalCount: number;
+}
+
+export async function getItemsByType(
+  userId: string,
+  typeName: string,
+  skip = 0,
+  take = 21
+): Promise<PaginatedItems> {
+  const [items, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where: {
+        userId,
+        type: {
+          name: {
+            equals: typeName,
+            mode: "insensitive",
+          },
         },
       },
-    },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      type: {
-        select: {
-          id: true,
-          name: true,
-          icon: true,
-          color: true,
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take,
+      include: {
+        type: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.item.count({
+      where: {
+        userId,
+        type: {
+          name: {
+            equals: typeName,
+            mode: "insensitive",
+          },
+        },
+      },
+    }),
+  ]);
+
+  return { items, totalCount };
 }
 
 export async function getItemsByCollection(
   userId: string,
-  collectionId: string
-): Promise<ItemWithType[]> {
-  return prisma.item.findMany({
-    where: {
-      userId,
-      collections: {
-        some: {
-          collectionId,
+  collectionId: string,
+  skip = 0,
+  take = 21
+): Promise<PaginatedItems> {
+  const [items, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where: {
+        userId,
+        collections: {
+          some: {
+            collectionId,
+          },
         },
       },
-    },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      type: {
-        select: {
-          id: true,
-          name: true,
-          icon: true,
-          color: true,
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take,
+      include: {
+        type: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.item.count({
+      where: {
+        userId,
+        collections: {
+          some: {
+            collectionId,
+          },
+        },
+      },
+    }),
+  ]);
+
+  return { items, totalCount };
 }
 
 export interface ItemDetail {

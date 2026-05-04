@@ -12,6 +12,11 @@ export const MINUTE_MS = 60 * 1000;
 export const HOUR_MS = 60 * MINUTE_MS;
 export const DAY_MS = 24 * HOUR_MS;
 
+export const ITEMS_PER_PAGE = 21;
+export const COLLECTIONS_PER_PAGE = 21;
+export const DASHBOARD_COLLECTIONS_LIMIT = 6;
+export const DASHBOARD_RECENT_ITEMS_LIMIT = 10;
+
 export const typeIcons: Record<string, React.ReactNode> = {
   snippet: <Code2 className="h-4 w-4" />,
   prompt: <Bot className="h-4 w-4" />,
@@ -42,7 +47,15 @@ export const typeDisplayNames: Record<string, string> = {
   link: "Links",
 };
 
-export const typeOrder = ["snippet", "prompt", "command", "note", "file", "image", "link"];
+export const typeOrder = [
+  "snippet",
+  "prompt",
+  "command",
+  "note",
+  "file",
+  "image",
+  "link",
+];
 
 export function getIconWithColor(icon: React.ReactNode, color: string | null) {
   if (!color) return icon;

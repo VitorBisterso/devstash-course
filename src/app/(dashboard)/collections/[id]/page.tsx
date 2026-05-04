@@ -7,18 +7,21 @@ import { DashboardItemsGrid } from "@/components/dashboard/dashboard-items-grid"
 import { ImageGalleryGrid } from "@/components/dashboard/image-gallery-grid";
 import { FileListView } from "@/components/dashboard/file-list-view";
 import { CollectionActions } from "@/components/dashboard/collection-actions";
+import { Pagination } from "@/components/pagination";
 import { getCollectionById, getFavoriteCollections } from "@/lib/db/collections";
 import { getItemsByCollection, getRecentItems, getSystemItemTypes } from "@/lib/db/items";
 import { getSearchData } from "@/lib/db/search";
+import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { FolderOpen, Star } from "lucide-react";
 
 interface PageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function CollectionDetailPage({ params }: PageProps) {
+export default async function CollectionDetailPage({ params, searchParams }: PageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -26,20 +29,29 @@ export default async function CollectionDetailPage({ params }: PageProps) {
   }
 
   const { id: collectionId } = await params;
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10));
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const userId = session.user.id;
 
-  const [collection, itemTypes, favoriteCollections, recentItems, items, searchData] = await Promise.all([
+  const [collection, itemTypes, favoriteCollections, recentItems, result, searchData] = await Promise.all([
     getCollectionById(userId, collectionId),
     getSystemItemTypes(),
     getFavoriteCollections(userId),
     getRecentItems(userId, 5),
-    getItemsByCollection(userId, collectionId),
+    getItemsByCollection(userId, collectionId, skip, ITEMS_PER_PAGE),
     getSearchData(userId),
   ]);
+
+  const safeSearchData = searchData ?? null;
 
   if (!collection) {
     notFound();
   }
+
+  const { items, totalCount } = result;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const sidebarData = {
     itemTypes,
@@ -53,7 +65,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
   const dominantTypeName = collection.itemTypes[0]?.name.toLowerCase();
 
   return (
-    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
+    <DashboardShellWrapper sidebarData={sidebarData} searchData={safeSearchData}>
       <ItemDrawerController>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -67,7 +79,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
                   </p>
                 )}
                 <p className="text-muted-foreground">
-                  {items.length} {items.length === 1 ? "item" : "items"}
+                  {totalCount} {totalCount === 1 ? "item" : "items"}
                   {collection.isFavorite && " · "}
                   {collection.isFavorite && (
                     <span className="flex items-center gap-1">
@@ -86,7 +98,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
             />
           </div>
 
-          {items.length === 0 ? (
+          {totalCount === 0 ? (
             <p className="text-muted-foreground">
               No items in this collection yet.
             </p>
@@ -97,6 +109,12 @@ export default async function CollectionDetailPage({ params }: PageProps) {
           ) : (
             <DashboardItemsGrid items={items} />
           )}
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            baseUrl={`/collections/${collectionId}`}
+          />
         </div>
       </ItemDrawerController>
     </DashboardShellWrapper>
