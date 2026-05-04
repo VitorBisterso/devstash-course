@@ -10,6 +10,7 @@ import { SearchDrawerProvider, useSearchDrawer } from "./search-drawer-context";
 import type { SystemItemType } from "@/lib/db/items";
 import type { CollectionWithTypes } from "@/lib/db/collections";
 import type { ItemWithType } from "@/lib/db/items";
+import { Star } from "lucide-react";
 import type { SearchData } from "@/lib/db/search";
 
 export interface SidebarData {
@@ -72,6 +73,13 @@ export function DashboardShell({
         >
           Collection
         </button>
+        <Link
+          href="/favorites"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9"
+          title="Favorites"
+        >
+          <Star className="h-4 w-4" />
+        </Link>
       </header>
       <div className="flex flex-1 overflow-hidden">
         <div className="hidden md:block">

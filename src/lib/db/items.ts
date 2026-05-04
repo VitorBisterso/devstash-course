@@ -385,6 +385,26 @@ export async function getItemById(userId: string, itemId: string): Promise<ItemD
   };
 }
 
+export async function getFavoriteItems(userId: string): Promise<ItemWithType[]> {
+  return prisma.item.findMany({
+    where: {
+      userId,
+      isFavorite: true,
+    },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      type: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true,
+        },
+      },
+    },
+  });
+}
+
 export interface UpdateItemInput {
   title: string;
   description: string | null;
