@@ -9,7 +9,7 @@ import {
 import { typeIcons, getIconWithColor } from "@/lib/constants";
 import { getTypeField, isCodeType } from "@/lib/item-types";
 import type { ItemDetail } from "@/lib/db/items";
-import { updateItem } from "@/actions/items";
+import { updateItem, toggleItemFavorite } from "@/actions/items";
 import { toast } from "sonner";
 import {
   ItemDrawerLoading,
@@ -134,13 +134,13 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 
   const handleFavorite = async () => {
     if (!item) return;
-    const res = await fetch(`/api/items/${item.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ isFavorite: !item.isFavorite }),
-    });
-    if (res.ok) {
-      setItem({ ...item, isFavorite: !item.isFavorite });
-      toast.success(item.isFavorite ? "Removed from favorites" : "Added to favorites");
+    const result = await toggleItemFavorite(item.id);
+    if (result.success) {
+      setItem({ ...item, isFavorite: result.isFavorite ?? false });
+      toast.success(result.isFavorite ? "Added to favorites" : "Removed from favorites");
+      router.refresh();
+    } else {
+      toast.error(result.error ?? "Failed to update favorite");
     }
   };
 

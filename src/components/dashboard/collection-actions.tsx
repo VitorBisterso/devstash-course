@@ -46,7 +46,8 @@ export function CollectionActions({
       const result = await toggleCollectionFavorite(collectionId);
       if (result.success) {
         setIsFavorite(result.isFavorite ?? false);
-        toast.success("Collection favorited");
+        toast.success(result.isFavorite ? "Collection favorited" : "Removed from favorites");
+        router.refresh();
       } else {
         toast.error(result.error ?? "Failed to update favorite");
       }

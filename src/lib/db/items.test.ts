@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getItemById, updateItem, deleteItem, createItem } from "./items";
+import { getItemById, updateItem, deleteItem, createItem, toggleItemFavorite } from "./items";
 import { prisma } from "@/lib/prisma";
 
 const mockItemBase = {
@@ -424,5 +424,57 @@ describe("createItem", () => {
     });
 
     expect(result).toEqual({ id: "item-123" });
+  });
+});
+
+describe("toggleItemFavorite", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns null when item not found", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null);
+
+    const result = await toggleItemFavorite("user-123", "item-456");
+
+    expect(result).toBeNull();
+    expect(prisma.item.findFirst).toHaveBeenCalledWith({
+      where: { id: "item-456", userId: "user-123" },
+      select: { isFavorite: true },
+    });
+  });
+
+  it("toggles favorite from false to true", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({
+      isFavorite: false,
+    });
+    vi.mocked(prisma.item.update).mockResolvedValue({
+      isFavorite: true,
+    });
+
+    const result = await toggleItemFavorite("user-123", "item-123");
+
+    expect(result).toBe(true);
+    expect(prisma.item.update).toHaveBeenCalledWith({
+      where: { id: "item-123", userId: "user-123" },
+      data: { isFavorite: true },
+    });
+  });
+
+  it("toggles favorite from true to false", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({
+      isFavorite: true,
+    });
+    vi.mocked(prisma.item.update).mockResolvedValue({
+      isFavorite: false,
+    });
+
+    const result = await toggleItemFavorite("user-123", "item-123");
+
+    expect(result).toBe(false);
+    expect(prisma.item.update).toHaveBeenCalledWith({
+      where: { id: "item-123", userId: "user-123" },
+      data: { isFavorite: false },
+    });
   });
 });

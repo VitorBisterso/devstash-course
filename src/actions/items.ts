@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
-import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes } from "@/lib/db/items";
+import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes, toggleItemFavorite as dbToggleItemFavorite } from "@/lib/db/items";
 
 const createItemSchema = z.object({
   title: z
@@ -187,5 +187,34 @@ export async function updateItem(
   } catch (error) {
     console.error("Failed to update item:", error);
     return { success: false, error: "Failed to update item" };
+  }
+}
+
+export interface ToggleItemFavoriteResult {
+  success: boolean;
+  isFavorite?: boolean;
+  error?: string;
+}
+
+export async function toggleItemFavorite(
+  itemId: string
+): Promise<ToggleItemFavoriteResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const isFavorite = await dbToggleItemFavorite(session.user.id, itemId);
+
+    if (isFavorite === null) {
+      return { success: false, error: "Item not found" };
+    }
+
+    return { success: true, isFavorite };
+  } catch (error) {
+    console.error("Failed to toggle item favorite:", error);
+    return { success: false, error: "Failed to toggle item favorite" };
   }
 }

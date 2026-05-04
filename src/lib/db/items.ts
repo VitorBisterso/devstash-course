@@ -405,6 +405,25 @@ export async function getFavoriteItems(userId: string): Promise<ItemWithType[]> 
   });
 }
 
+export async function toggleItemFavorite(
+  userId: string,
+  itemId: string
+): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { isFavorite: true },
+  });
+
+  if (!item) return null;
+
+  const updated = await prisma.item.update({
+    where: { id: itemId, userId },
+    data: { isFavorite: !item.isFavorite },
+  });
+
+  return updated.isFavorite;
+}
+
 export interface UpdateItemInput {
   title: string;
   description: string | null;

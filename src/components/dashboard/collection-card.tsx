@@ -52,6 +52,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
       if (result.success) {
         setIsFavorite(result.isFavorite ?? false);
         toast.success(result.isFavorite ? "Collection favorited" : "Removed from favorites");
+        router.refresh();
       } else {
         toast.error(result.error ?? "Failed to update favorite");
       }
