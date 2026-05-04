@@ -5,9 +5,10 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isOnDashboard = req.nextUrl.pathname.startsWith("/dashboard");
   const isOnProfile = req.nextUrl.pathname.startsWith("/profile");
+  const isOnSettings = req.nextUrl.pathname.startsWith("/settings");
   const isAuthPage = req.nextUrl.pathname.startsWith("/api/auth");
 
-  if ((isOnDashboard || isOnProfile) && !isLoggedIn) {
+  if ((isOnDashboard || isOnProfile || isOnSettings) && !isLoggedIn) {
     return NextResponse.redirect(
       new URL("/api/auth/signin", req.nextUrl)
     );
@@ -21,5 +22,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile"],
+  matcher: ["/dashboard/:path*", "/profile", "/settings"],
 };

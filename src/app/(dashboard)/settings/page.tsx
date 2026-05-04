@@ -3,12 +3,12 @@ import { auth } from "@/auth";
 import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { getUserProfile, getUserStats, getUserAuthMethods } from "@/lib/db/profile";
-import { ProfileStats } from "@/components/profile/profile-stats";
+import { SettingsActions } from "@/components/settings/settings-actions";
 import { getSystemItemTypes, getRecentItems } from "@/lib/db/items";
 import { getFavoriteCollections } from "@/lib/db/collections";
 import { getSearchData } from "@/lib/db/search";
 
-export default async function ProfilePage() {
+export default async function SettingsPage() {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -29,16 +29,6 @@ export default async function ProfilePage() {
     redirect("/api/auth/signin");
   }
 
-  const typeMap = new Map(itemTypes.map((t) => [t.id, t]));
-
-  const statsWithTypes = {
-    ...stats,
-    itemsByType: stats.itemsByType.map((item) => ({
-      ...item,
-      type: typeMap.get(item.typeId) ?? null,
-    })),
-  };
-
   const sidebarData = {
     itemTypes,
     favoriteCollections,
@@ -52,8 +42,8 @@ export default async function ProfilePage() {
     <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <div className="space-y-8 max-w-2xl">
         <div>
-          <h1 className="text-2xl font-bold">Profile</h1>
-          <p className="text-muted-foreground">View your profile information</p>
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">Manage your account settings</p>
         </div>
 
         <div className="rounded-lg border bg-card p-6">
@@ -74,7 +64,10 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <ProfileStats stats={statsWithTypes} />
+        <SettingsActions
+          userId={session.user.id}
+          hasPassword={authMethods.hasPassword}
+        />
       </div>
     </DashboardShellWrapper>
   );
