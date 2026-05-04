@@ -31,8 +31,14 @@ describe("getSearchData", () => {
       { id: "col-1", name: "My Collection", _count: { items: 5 } },
     ];
 
-    vi.mocked(prisma.item.findMany).mockResolvedValue(mockItems as any);
-    vi.mocked(prisma.collection.findMany).mockResolvedValue(mockCollections as any);
+    vi.mocked(prisma.item.findMany).mockResolvedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockItems as unknown as any,
+    );
+    vi.mocked(prisma.collection.findMany).mockResolvedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockCollections as unknown as any,
+    );
 
     const result = await getSearchData("user-123");
 
@@ -74,7 +80,10 @@ describe("getSearchData", () => {
       },
     ];
 
-    vi.mocked(prisma.item.findMany).mockResolvedValue(mockItems as any);
+    vi.mocked(prisma.item.findMany).mockResolvedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockItems as unknown as any,
+    );
     vi.mocked(prisma.collection.findMany).mockResolvedValue([]);
 
     const result = await getSearchData("user-123");
@@ -93,7 +102,10 @@ describe("getSearchData", () => {
       },
     ];
 
-    vi.mocked(prisma.item.findMany).mockResolvedValue(mockItems as any);
+    vi.mocked(prisma.item.findMany).mockResolvedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockItems as unknown as any,
+    );
     vi.mocked(prisma.collection.findMany).mockResolvedValue([]);
 
     const result = await getSearchData("user-123");

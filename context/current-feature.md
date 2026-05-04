@@ -2,33 +2,11 @@
 
 ## Status
 
-In Progress
+Not started
 
 ## Goals
 
-- Create a settings page at /settings with protected route
-- Add settings link in user icon dropdown at the bottom of sidebar
-- Move Account actions (delete account and change password) from profile page to settings page
-
 ## Notes
-
-- URL is /settings
-- Route is protected (requires authentication) - updated proxy.ts
-- Settings link added to UserMenu dropdown in sidebar
-- Account actions moved from profile:
-  - Delete account
-  - Change password (for email users)
-- Created settings-actions.tsx component
-- Profile page now shows only user info and stats
-- Forgot password functionality remains in auth pages (/forgot-password)
-
-## Implementation Details
-
-1. Created `/settings` page at `src/app/(dashboard)/settings/page.tsx`
-2. Created `SettingsActions` component at `src/components/settings/settings-actions.tsx`
-3. Updated `UserMenu` to include Settings link with Settings icon
-4. Updated `proxy.ts` to protect `/settings` route
-5. Removed `ProfileActions` from profile page, updated description to "View your profile information"
 
 ## History
 
@@ -73,3 +51,5 @@ In Progress
 - **2026-04-23**: Completed Collection Buttons - added edit, delete, and favorite buttons on /collections/[id] page with edit modal and delete confirmation. Added 3-dot dropdown to CollectionCard at /collections and dashboard with edit, delete, and favorite options. Clicking card navigates to collection page.
 - **2026-04-23**: Completed Global Search / Command Palette - added Cmd+K / Ctrl+K global search with fuzzy search across items and collections, grouped results (Items/Collections), keyboard navigation, top bar search input with ⌘K hint, uses shadcn cmdk component, client-side filtering, pre-fetched search data, and unit tests for getSearchData.
 - **2026-05-04**: Completed Pagination - added pagination to /items/[type] and /collections/[id] pages with page numbers and prev/next links (greyed out when unavailable), created Pagination component, updated DB functions with skip/take parameters, applied dashboard limits (6 collections, 10 recent items), used constants ITEMS_PER_PAGE=21 and COLLECTIONS_PER_PAGE=21.
+- **2026-05-04**: Completed Settings Page - created /settings route with protected access, added Settings link to user dropdown in sidebar, moved account actions (delete account and change password) from profile page to settings page. Profile page now shows only user info and stats.
+- **2026-05-04**: Completed Editor Preferences Settings - added editor preferences section to settings page with font size, tab size, word wrap, minimap, and theme dropdowns. Store preferences in JSON column on User model, auto-save on change with toast notifications, created EditorPreferencesContext for client components, and applied settings to Monaco Editor

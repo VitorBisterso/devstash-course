@@ -2,7 +2,8 @@
 
 import { Editor } from "@monaco-editor/react";
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useEditorPreferences } from "@/context/editor-preferences-context";
 
 interface CodeEditorProps {
   value: string;
@@ -20,6 +21,48 @@ export function CodeEditor({
   minHeight = 100,
 }: CodeEditorProps) {
   const [copied, setCopied] = useState(false);
+  const { preferences } = useEditorPreferences();
+  const editorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null);
+
+  const handleEditorBeforeMount = useCallback((monaco: import("@monaco-editor/react").Monaco) => {
+    monaco.editor.defineTheme("monokai", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.background": "#272822",
+        "editor.foreground": "#F8F8F2",
+        "editorLineNumber.foreground": "#90908a",
+        "editorLineNumber.activeForeground": "#F8F8F2",
+      },
+    });
+    monaco.editor.defineTheme("github-dark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.background": "#0d1117",
+        "editor.foreground": "#c9d1d9",
+        "editorLineNumber.foreground": "#8b949e",
+        "editorLineNumber.activeForeground": "#c9d1d9",
+      },
+    });
+  }, []);
+
+  const handleEditorMount = useCallback((editor: import("monaco-editor").editor.IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+  }, []);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.updateOptions({
+        fontSize: preferences.fontSize,
+        tabSize: preferences.tabSize,
+        wordWrap: preferences.wordWrap ? "on" : "off",
+        minimap: { enabled: preferences.minimap },
+      });
+    }
+  }, [preferences.fontSize, preferences.tabSize, preferences.wordWrap, preferences.minimap]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(value);
@@ -61,16 +104,18 @@ export function CodeEditor({
           language={language}
           value={value}
           onChange={(val) => onChange?.(val || "")}
-          theme="vs-dark"
+          theme={preferences.theme}
+          beforeMount={handleEditorBeforeMount}
+          onMount={handleEditorMount}
           options={{
             readOnly,
-            minimap: { enabled: false },
+            minimap: { enabled: preferences.minimap },
             lineNumbers: "on",
             glyphMargin: false,
             folding: false,
             lineDecorationsWidth: 8,
             lineNumbersMinChars: 4,
-            wordWrap: "on",
+            wordWrap: preferences.wordWrap ? "on" : "off",
             scrollBeyondLastLine: false,
             renderLineHighlight: "none",
             overviewRulerLanes: 0,
@@ -82,7 +127,8 @@ export function CodeEditor({
               verticalScrollbarSize: 8,
             },
             padding: { top: 8, bottom: 8 },
-            fontSize: 13,
+            fontSize: preferences.fontSize,
+            tabSize: preferences.tabSize,
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           }}
         />
