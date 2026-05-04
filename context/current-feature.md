@@ -1,21 +1,34 @@
-# Pagination
+# Current Feature
 
 ## Status
 
-Complete
+In Progress
 
 ## Goals
 
-- Add pagination to /items/[type] and /collections/[id] pages
-- Pagination controls at bottom with page numbers and prev/next links
-- Disable (grey out) prev/next when not available
-- Use constants: ITEMS_PER_PAGE = 21, COLLECTIONS_PER_PAGE = 21
-- Dashboard limits: DASHBOARD_COLLECTIONS_LIMIT = 6, DASHBOARD_RECENT_ITEMS_LIMIT = 10
-- Do not fetch all resources at once. Only fetch the amount that a page requires
+- Create a settings page at /settings with protected route
+- Add settings link in user icon dropdown at the bottom of sidebar
+- Move Account actions (delete account and change password) from profile page to settings page
 
 ## Notes
 
-Add pagination for items and collections listings with numbered page links.
+- URL is /settings
+- Route is protected (requires authentication) - updated proxy.ts
+- Settings link added to UserMenu dropdown in sidebar
+- Account actions moved from profile:
+  - Delete account
+  - Change password (for email users)
+- Created settings-actions.tsx component
+- Profile page now shows only user info and stats
+- Forgot password functionality remains in auth pages (/forgot-password)
+
+## Implementation Details
+
+1. Created `/settings` page at `src/app/(dashboard)/settings/page.tsx`
+2. Created `SettingsActions` component at `src/components/settings/settings-actions.tsx`
+3. Updated `UserMenu` to include Settings link with Settings icon
+4. Updated `proxy.ts` to protect `/settings` route
+5. Removed `ProfileActions` from profile page, updated description to "View your profile information"
 
 ## History
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import {
   DropdownMenu,
@@ -39,6 +39,12 @@ export function UserMenu({ name, email, image }: UserMenuProps) {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem>
+            <Link href="/settings" className="flex items-center w-full">
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <Link href="/profile" className="flex items-center w-full">
               <User className="mr-2 h-4 w-4" />
