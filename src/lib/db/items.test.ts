@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getItemById, updateItem, deleteItem, createItem, toggleItemFavorite } from "./items";
+import { getItemById, updateItem, deleteItem, createItem, toggleItemFavorite, toggleItemPin } from "./items";
 import { prisma } from "@/lib/prisma";
 
 const mockItemBase = {
@@ -475,6 +475,58 @@ describe("toggleItemFavorite", () => {
     expect(prisma.item.update).toHaveBeenCalledWith({
       where: { id: "item-123", userId: "user-123" },
       data: { isFavorite: false },
+    });
+  });
+});
+
+describe("toggleItemPin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns null when item not found", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null);
+
+    const result = await toggleItemPin("user-123", "item-456");
+
+    expect(result).toBeNull();
+    expect(prisma.item.findFirst).toHaveBeenCalledWith({
+      where: { id: "item-456", userId: "user-123" },
+      select: { isPinned: true },
+    });
+  });
+
+  it("toggles pin from false to true", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({
+      isPinned: false,
+    });
+    vi.mocked(prisma.item.update).mockResolvedValue({
+      isPinned: true,
+    });
+
+    const result = await toggleItemPin("user-123", "item-123");
+
+    expect(result).toBe(true);
+    expect(prisma.item.update).toHaveBeenCalledWith({
+      where: { id: "item-123", userId: "user-123" },
+      data: { isPinned: true },
+    });
+  });
+
+  it("toggles pin from true to false", async () => {
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({
+      isPinned: true,
+    });
+    vi.mocked(prisma.item.update).mockResolvedValue({
+      isPinned: false,
+    });
+
+    const result = await toggleItemPin("user-123", "item-123");
+
+    expect(result).toBe(false);
+    expect(prisma.item.update).toHaveBeenCalledWith({
+      where: { id: "item-123", userId: "user-123" },
+      data: { isPinned: false },
     });
   });
 });

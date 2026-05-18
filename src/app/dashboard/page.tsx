@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { DashboardShellWrapper } from "@/components/dashboard/dashboard-shell";
 import { ItemDrawerController } from "@/components/dashboard/item-drawer-controller";
+import { EditorPreferencesProvider } from "@/context/editor-preferences-context";
+import { getEditorPreferencesAction } from "@/lib/actions/editor-preferences";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
 import { PinnedItems } from "@/components/dashboard/pinned-items";
@@ -19,7 +21,7 @@ export default async function DashboardPage() {
 
   const userId = session.user.id;
 
-  const [recentCollections, pinnedItems, recentItems, itemTypes, favoriteCollections, searchData] =
+  const [recentCollections, pinnedItems, recentItems, itemTypes, favoriteCollections, searchData, editorPrefs] =
     await Promise.all([
       getRecentCollections(userId, 6),
       getPinnedItems(userId),
@@ -27,6 +29,7 @@ export default async function DashboardPage() {
       getSystemItemTypes(),
       getFavoriteCollections(userId),
       getSearchData(userId),
+      getEditorPreferencesAction(),
     ]);
 
   const sidebarData = {
@@ -41,12 +44,14 @@ export default async function DashboardPage() {
   return (
     <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
       <ItemDrawerController>
-        <div className="space-y-8">
-          <StatsCards userId={userId} />
-          <RecentCollections collections={recentCollections} />
-          <PinnedItems items={pinnedItems} />
-          <RecentItems items={recentItems} />
-        </div>
+        <EditorPreferencesProvider initialPreferences={editorPrefs}>
+          <div className="space-y-8">
+            <StatsCards userId={userId} />
+            <RecentCollections collections={recentCollections} />
+            <PinnedItems items={pinnedItems} />
+            <RecentItems items={recentItems} />
+          </div>
+        </EditorPreferencesProvider>
       </ItemDrawerController>
     </DashboardShellWrapper>
   );

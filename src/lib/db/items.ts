@@ -165,7 +165,7 @@ export async function getPinnedItems(userId: string): Promise<ItemWithType[]> {
 export async function getRecentItems(userId: string, limit = 10): Promise<ItemWithType[]> {
   return prisma.item.findMany({
     where: { userId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
     take: limit,
     include: {
       type: {
@@ -222,7 +222,7 @@ export async function getItemsByType(
           },
         },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
       skip,
       take,
       include: {
@@ -268,7 +268,7 @@ export async function getItemsByCollection(
           },
         },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
       skip,
       take,
       include: {
@@ -391,7 +391,7 @@ export async function getFavoriteItems(userId: string): Promise<ItemWithType[]> 
       userId,
       isFavorite: true,
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
     include: {
       type: {
         select: {
@@ -422,6 +422,25 @@ export async function toggleItemFavorite(
   });
 
   return updated.isFavorite;
+}
+
+export async function toggleItemPin(
+  userId: string,
+  itemId: string
+): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { isPinned: true },
+  });
+
+  if (!item) return null;
+
+  const updated = await prisma.item.update({
+    where: { id: itemId, userId },
+    data: { isPinned: !item.isPinned },
+  });
+
+  return updated.isPinned;
 }
 
 export interface UpdateItemInput {

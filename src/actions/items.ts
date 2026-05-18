@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
-import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes, toggleItemFavorite as dbToggleItemFavorite } from "@/lib/db/items";
+import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes, toggleItemFavorite as dbToggleItemFavorite, toggleItemPin as dbToggleItemPin } from "@/lib/db/items";
 
 const createItemSchema = z.object({
   title: z
@@ -194,6 +194,35 @@ export interface ToggleItemFavoriteResult {
   success: boolean;
   isFavorite?: boolean;
   error?: string;
+}
+
+export interface ToggleItemPinResult {
+  success: boolean;
+  isPinned?: boolean;
+  error?: string;
+}
+
+export async function toggleItemPin(
+  itemId: string
+): Promise<ToggleItemPinResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    const isPinned = await dbToggleItemPin(session.user.id, itemId);
+
+    if (isPinned === null) {
+      return { success: false, error: "Item not found" };
+    }
+
+    return { success: true, isPinned };
+  } catch (error) {
+    console.error("Failed to toggle item pin:", error);
+    return { success: false, error: "Failed to toggle item pin" };
+  }
 }
 
 export async function toggleItemFavorite(

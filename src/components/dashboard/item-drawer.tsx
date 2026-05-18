@@ -9,7 +9,7 @@ import {
 import { typeIcons, getIconWithColor } from "@/lib/constants";
 import { getTypeField, isCodeType } from "@/lib/item-types";
 import type { ItemDetail } from "@/lib/db/items";
-import { updateItem, toggleItemFavorite } from "@/actions/items";
+import { updateItem, toggleItemFavorite, toggleItemPin } from "@/actions/items";
 import { toast } from "sonner";
 import {
   ItemDrawerLoading,
@@ -146,13 +146,13 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 
   const handlePin = async () => {
     if (!item) return;
-    const res = await fetch(`/api/items/${item.id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ isPinned: !item.isPinned }),
-    });
-    if (res.ok) {
-      setItem({ ...item, isPinned: !item.isPinned });
-      toast.success(item.isPinned ? "Unpinned" : "Pinned");
+    const result = await toggleItemPin(item.id);
+    if (result.success) {
+      setItem({ ...item, isPinned: result.isPinned ?? false });
+      toast.success(result.isPinned ? "Pinned" : "Unpinned");
+      router.refresh();
+    } else {
+      toast.error(result.error ?? "Failed to update pin");
     }
   };
 
