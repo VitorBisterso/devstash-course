@@ -43,16 +43,16 @@ export default async function DashboardPage() {
 
   return (
     <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
-      <ItemDrawerController>
-        <EditorPreferencesProvider initialPreferences={editorPrefs}>
+      <EditorPreferencesProvider initialPreferences={editorPrefs}>
+        <ItemDrawerController>
           <div className="space-y-8">
             <StatsCards userId={userId} />
             <RecentCollections collections={recentCollections} />
             <PinnedItems items={pinnedItems} />
             <RecentItems items={recentItems} />
           </div>
-        </EditorPreferencesProvider>
-      </ItemDrawerController>
+        </ItemDrawerController>
+      </EditorPreferencesProvider>
     </DashboardShellWrapper>
   );
 }
