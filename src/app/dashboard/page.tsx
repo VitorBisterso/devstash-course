@@ -42,8 +42,8 @@ export default async function DashboardPage() {
   };
 
   return (
-    <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
-      <EditorPreferencesProvider initialPreferences={editorPrefs}>
+    <EditorPreferencesProvider initialPreferences={editorPrefs}>
+      <DashboardShellWrapper sidebarData={sidebarData} searchData={searchData}>
         <ItemDrawerController>
           <div className="space-y-8">
             <StatsCards userId={userId} />
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
             <RecentItems items={recentItems} />
           </div>
         </ItemDrawerController>
-      </EditorPreferencesProvider>
-    </DashboardShellWrapper>
+      </DashboardShellWrapper>
+    </EditorPreferencesProvider>
   );
 }
