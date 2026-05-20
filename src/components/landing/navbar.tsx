@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { X, Menu } from "lucide-react";
 
@@ -15,12 +16,21 @@ function scrollTo(id: string) {
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  function handleNavClick(e: React.MouseEvent, id: string) {
+    if (isHome) {
+      e.preventDefault();
+      scrollTo(id);
+    }
+  }
 
   return (
     <nav
@@ -43,18 +53,20 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          <button
-            onClick={() => scrollTo("features")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors bg-none border-none cursor-pointer"
+          <Link
+            href="/#features"
+            onClick={(e) => handleNavClick(e, "features")}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Features
-          </button>
-          <button
-            onClick={() => scrollTo("pricing")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors bg-none border-none cursor-pointer"
+          </Link>
+          <Link
+            href="/#pricing"
+            onClick={(e) => handleNavClick(e, "pricing")}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Pricing
-          </button>
+          </Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -77,18 +89,20 @@ export function Navbar() {
 
       {open && (
         <div className="md:hidden bg-background/98 backdrop-blur-md border-b border-border px-6 py-5 flex flex-col items-center gap-4">
-          <button
-            onClick={() => { scrollTo("features"); setOpen(false); }}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors bg-none border-none cursor-pointer"
+          <Link
+            href="/#features"
+            onClick={(e) => { handleNavClick(e, "features"); setOpen(false); }}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Features
-          </button>
-          <button
-            onClick={() => { scrollTo("pricing"); setOpen(false); }}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors bg-none border-none cursor-pointer"
+          </Link>
+          <Link
+            href="/#pricing"
+            onClick={(e) => { handleNavClick(e, "pricing"); setOpen(false); }}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Pricing
-          </button>
+          </Link>
           <div className="flex flex-col gap-3 w-full pt-2 border-t border-border">
             <Button variant="ghost" className="w-full" nativeButton={false} render={<Link href="/sign-in" onClick={() => setOpen(false)} />}>
               Sign In

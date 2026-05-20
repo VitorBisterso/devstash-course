@@ -48,7 +48,13 @@ export function DashboardShell({
         </div>
         <div className="flex items-center gap-3 flex-1">
           <Link href="/dashboard" className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <span className="text-primary-foreground text-sm font-bold">D</span>
+            <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="6" fill="#3b82f6" />
+              <path
+                d="M8 8h12v2H8V8zm0 5h12v2H8v-2zm0 5h8v2H8v-2z"
+                fill="white"
+              />
+            </svg>
           </Link>
           <Link href="/dashboard" className="font-semibold hidden sm:inline">DevStash</Link>
           <button
