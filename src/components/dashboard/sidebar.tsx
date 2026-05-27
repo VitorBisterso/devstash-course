@@ -29,6 +29,7 @@ interface SidebarData {
   userName: string;
   userEmail: string;
   userImage?: string | null;
+  isPro?: boolean;
 }
 
 function SidebarContent({ data }: { data: SidebarData }) {
@@ -36,7 +37,7 @@ function SidebarContent({ data }: { data: SidebarData }) {
     <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto p-4">
         <nav className="space-y-6">
-          <SidebarItems itemTypes={data.itemTypes} />
+          <SidebarItems itemTypes={data.itemTypes} isPro={data.isPro} />
           <SidebarCollections collections={data.favoriteCollections} />
           <SidebarRecent items={data.recentItems} />
         </nav>

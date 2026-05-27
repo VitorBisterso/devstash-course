@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
+import { canCreateCollection } from "@/lib/limits";
 import {
   createCollection as dbCreateCollection,
   getCollections as dbGetCollections,
@@ -43,6 +44,11 @@ export async function createCollection(
 
   if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
+  }
+
+  const limitCheck = await canCreateCollection(session.user.id);
+  if (!limitCheck) {
+    return { success: false, error: "Free plan limited to 3 collections. Upgrade to Pro for unlimited collections." };
   }
 
   const parsed = createCollectionSchema.safeParse(data);

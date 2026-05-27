@@ -32,9 +32,10 @@ function SidebarSection({ title, icon, children, footer }: SidebarSectionProps) 
 
 interface SidebarItemsProps {
   itemTypes: SystemItemType[];
+  isPro?: boolean;
 }
 
-export function SidebarItems({ itemTypes }: SidebarItemsProps) {
+export function SidebarItems({ itemTypes, isPro }: SidebarItemsProps) {
   const sortedItemTypes = [...itemTypes].sort((a, b) => {
     const indexA = typeOrder.indexOf(a.name.toLowerCase());
     const indexB = typeOrder.indexOf(b.name.toLowerCase());
@@ -52,7 +53,7 @@ export function SidebarItems({ itemTypes }: SidebarItemsProps) {
             <span>{getIconWithColor(typeIcons[type.name.toLowerCase()] || <Code2 className="h-4 w-4" />, type.color)}</span>
             <span className="flex items-center gap-1.5">
               {typeDisplayNames[type.name.toLowerCase()] || type.name}
-              {(type.name.toLowerCase() === "file" || type.name.toLowerCase() === "image") && (
+              {(type.name.toLowerCase() === "file" || type.name.toLowerCase() === "image") && !isPro && (
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-medium">
                   PRO
                 </Badge>

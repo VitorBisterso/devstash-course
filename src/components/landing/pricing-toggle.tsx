@@ -102,7 +102,7 @@ export function PricingToggle() {
               </li>
             ))}
           </ul>
-          <Button className="w-full" nativeButton={false} render={<a href="/register" />}>
+          <Button className="w-full" nativeButton={false} render={<a href="/settings?upgrade=true" />}>
             Get Started
           </Button>
         </div>

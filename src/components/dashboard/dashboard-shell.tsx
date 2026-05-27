@@ -19,6 +19,7 @@ export interface SidebarData {
   recentItems: ItemWithType[];
   userName: string;
   userEmail: string;
+  isPro?: boolean;
 }
 
 interface DashboardShellProps {

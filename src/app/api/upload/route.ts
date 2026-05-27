@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { isUserPro } from "@/lib/limits";
 import { uploadToR2 } from "@/lib/r2";
 import { v4 as uuidv4 } from "uuid";
 import { checkRateLimit, uploadRatelimit } from "@/lib/rate-limit";
@@ -54,6 +55,11 @@ export async function POST(request: NextRequest) {
 
   if (!session?.user?.id) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const pro = await isUserPro(session.user.id);
+  if (!pro) {
+    return new NextResponse("File uploads are a Pro feature", { status: 403 });
   }
 
   const rateLimitResult = await checkRateLimit(

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
+import { canCreateItem } from "@/lib/limits";
 import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes, toggleItemFavorite as dbToggleItemFavorite, toggleItemPin as dbToggleItemPin } from "@/lib/db/items";
 
 const createItemSchema = z.object({
@@ -40,6 +41,11 @@ export async function createItem(data: unknown): Promise<CreateItemResult> {
 
   if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
+  }
+
+  const limitCheck = await canCreateItem(session.user.id);
+  if (!limitCheck) {
+    return { success: false, error: "Free plan limited to 50 items. Upgrade to Pro for unlimited items." };
   }
 
   const parsed = createItemSchema.safeParse(data);

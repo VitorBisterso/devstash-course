@@ -14,6 +14,9 @@ import { getSearchData } from "@/lib/db/search";
 import { getEditorPreferences } from "@/lib/db/editor-preferences";
 import { EditorPreferencesProvider } from "@/context/editor-preferences-context";
 import { EditorPreferences } from "@/components/settings/editor-preferences";
+import { SubscriptionSection } from "@/components/settings/subscription-section";
+import { getSubscriptionStatus } from "@/actions/billing";
+import { PRO_PRICES } from "@/lib/plans";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -31,6 +34,7 @@ export default async function SettingsPage() {
     recentItems,
     searchData,
     editorPrefs,
+    subscription,
   ] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),
@@ -40,6 +44,7 @@ export default async function SettingsPage() {
     getRecentItems(session.user.id, 5),
     getSearchData(session.user.id),
     getEditorPreferences(session.user.id),
+    getSubscriptionStatus(),
   ]);
 
   if (!profile) {
@@ -53,6 +58,7 @@ export default async function SettingsPage() {
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: subscription.isPro,
   };
 
   return (
@@ -87,6 +93,12 @@ export default async function SettingsPage() {
           </div>
 
           <EditorPreferences initialPreferences={editorPrefs} />
+
+          <SubscriptionSection
+            isPro={subscription.isPro}
+            monthlyPriceId={PRO_PRICES.monthly}
+            yearlyPriceId={PRO_PRICES.yearly}
+          />
 
           <SettingsActions
             userId={session.user.id}

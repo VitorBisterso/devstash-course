@@ -2,22 +2,11 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Install `stripe` SDK and create Stripe client singleton
-- Define Free tier limits and Pro price IDs/features in `src/lib/plans.ts`
-- Implement usage-limit helpers (`canCreateItem`, `canCreateCollection`, `isUserPro`)
-- Add unit tests for limits module (11 tests)
-- Add environment variables for Stripe keys and price IDs
-
 ## Notes
-
-- Spec loaded from `context/features/stripe-phase-1-spec.md`
-- API version `2025-02-24` with TypeScript enabled
-- Pro users bypass all limits; free users capped at 50 items / 3 collections
-- Need to add `.env` and `.env.example` entries
 
 ## History
 
@@ -71,3 +60,5 @@ In Progress
 - **2026-05-18**: Completed Homepage Mockup - created `prototypes/homepage/` with `index.html`, `styles.css`, `script.js` featuring dark theme, hero with animated chaos/floating icons/dashboard preview, features grid (6 cards), AI section with code mockup, pricing (Free/Pro with yearly toggle), CTA, footer, scroll animations, and responsive design.
 - **2026-05-20**: Completed Homepage (Marketing Landing Page) - implemented prototype as Next.js app at `/` with auth redirect to dashboard. Created server components (Hero, Features, AI, Pricing, CTA, Footer) and client components (navbar with scroll-opacity/mobile hamburger/smooth anchor scrolling, chaos-box with floating icons and mouse repel, pricing-toggle with monthly/yearly switching, fade-in-wrapper with IntersectionObserver). Tailwind v4, ShadCN components, dark theme matching the app.
 - **2026-05-20**: Completed Auth Nav & Logo Consistency - added homepage Navbar to all auth pages via (auth) layout, replaced "D" box in dashboard shell with folder icon SVG matching homepage, fixed Features/Pricing nav links to use hash URLs that work across all pages.
+- **2026-05-27**: Completed Stripe Phase 1 — Core Infrastructure - installed stripe SDK, created Stripe client singleton, Free/Pro plan constants, usage-limit helpers (canCreateItem, canCreateCollection, isUserPro), and 11 unit tests.
+- **2026-05-27**: Completed Stripe Phase 2 — Integration & UI - created webhook handler for checkout/subscription lifecycle, checkout session and billing portal API routes, subscription-section UI, billing server action, synced `isPro` through Auth.js JWT/session, gated item/collection/file-upload behind usage limits, dynamic PRO badge in sidebar, landing page Pro CTA links to /settings?upgrade=true.
