@@ -2,11 +2,22 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Install `stripe` SDK and create Stripe client singleton
+- Define Free tier limits and Pro price IDs/features in `src/lib/plans.ts`
+- Implement usage-limit helpers (`canCreateItem`, `canCreateCollection`, `isUserPro`)
+- Add unit tests for limits module (11 tests)
+- Add environment variables for Stripe keys and price IDs
+
 ## Notes
+
+- Spec loaded from `context/features/stripe-phase-1-spec.md`
+- API version `2025-02-24` with TypeScript enabled
+- Pro users bypass all limits; free users capped at 50 items / 3 collections
+- Need to add `.env` and `.env.example` entries
 
 ## History
 
