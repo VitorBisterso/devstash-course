@@ -46,6 +46,7 @@ export default async function CollectionsPage({ searchParams }: PageProps) {
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: session.user.isPro,
   };
 
   return (

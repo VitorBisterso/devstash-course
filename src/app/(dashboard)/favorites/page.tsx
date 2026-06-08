@@ -34,6 +34,7 @@ export default async function FavoritesPage() {
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: session.user.isPro,
   };
 
   return (

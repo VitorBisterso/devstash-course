@@ -60,6 +60,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pag
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: session.user.isPro,
   };
 
   const dominantTypeName = collection.itemTypes[0]?.name.toLowerCase();

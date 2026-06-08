@@ -32,6 +32,11 @@ export default async function ItemsByTypePage({ params, searchParams }: PageProp
 
   const typeName = typeParam.charAt(0).toUpperCase() + typeParam.slice(1).toLowerCase();
 
+  const proTypes = ["file", "image"];
+  if (proTypes.includes(typeParam.toLowerCase()) && !session.user.isPro) {
+    redirect("/upgrade");
+  }
+
   const [result, itemTypes, favoriteCollections, recentItems, searchData] = await Promise.all([
     getItemsByType(session.user.id, typeName, skip, ITEMS_PER_PAGE),
     getSystemItemTypes(),
@@ -52,6 +57,7 @@ export default async function ItemsByTypePage({ params, searchParams }: PageProp
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: session.user.isPro,
   };
 
   const currentType = itemTypes.find(

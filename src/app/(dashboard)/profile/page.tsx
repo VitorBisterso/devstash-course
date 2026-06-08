@@ -58,6 +58,7 @@ export default async function ProfilePage() {
     userName: session?.user?.name ?? "User",
     userEmail: session?.user?.email ?? "",
     userImage: session?.user?.image ?? null,
+    isPro: session.user.isPro,
   };
 
   return (
