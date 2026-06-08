@@ -63,9 +63,7 @@ async function main() {
   const collections = [
     { name: 'React Patterns', description: 'Reusable React patterns and hooks' },
     { name: 'AI Workflows', description: 'AI prompts and workflow automations' },
-    { name: 'DevOps', description: 'Infrastructure and deployment resources' },
     { name: 'Terminal Commands', description: 'Useful shell commands for everyday development' },
-    { name: 'Design Resources', description: 'UI/UX resources and references' },
   ]
 
   console.log('Seeding collections...')
@@ -141,32 +139,6 @@ export function cn(...inputs: ClassValue[]) {
 }`,
       language: 'typescript',
       collectionId: createdCollections['React Patterns'],
-    },
-    {
-      title: 'Docker Compose for Local Dev',
-      content: `version: '3.8'
-
-services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
-      POSTGRES_DB: devdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/data
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
-volumes:
-  postgres_data:`,
-      language: 'yaml',
-      collectionId: createdCollections['DevOps'],
     },
   ]
 
@@ -247,58 +219,14 @@ Provide the refactored code with explanations.`,
       description: 'Follow logs with last 100 lines',
       collectionId: createdCollections['Terminal Commands'],
     },
-    {
-      title: 'Deploy Script',
-      content: `#!/bin/bash
-echo "Deploying to production..."
-git pull origin main
-npm install
-npm run build
-pm2 restart all
-echo "Deployment complete!"`,
-      description: 'Basic deployment script for Node.js apps',
-      collectionId: createdCollections['DevOps'],
-    },
   ]
 
-  const links = [
-    {
-      title: 'Docker Documentation',
-      url: 'https://docs.docker.com/',
-      description: 'Official Docker documentation and guides',
-      collectionId: createdCollections['DevOps'],
-    },
-    {
-      title: 'GitHub Actions Docs',
-      url: 'https://docs.github.com/en/actions',
-      description: 'Learn about CI/CD with GitHub Actions',
-      collectionId: createdCollections['DevOps'],
-    },
-    {
-      title: 'Tailwind CSS',
-      url: 'https://tailwindcss.com/',
-      description: 'Utility-first CSS framework',
-      collectionId: createdCollections['Design Resources'],
-    },
-    {
-      title: 'Shadcn UI',
-      url: 'https://ui.shadcn.com/',
-      description: 'Beautiful, accessible UI components',
-      collectionId: createdCollections['Design Resources'],
-    },
-    {
-      title: 'Radix UI',
-      url: 'https://www.radix-ui.com/',
-      description: 'Unstyled, accessible component primitives',
-      collectionId: createdCollections['Design Resources'],
-    },
-    {
-      title: 'Lucide Icons',
-      url: 'https://lucide.dev/',
-      description: 'Beautiful, consistent icon set',
-      collectionId: createdCollections['Design Resources'],
-    },
-  ]
+  const links: {
+    title: string
+    url: string
+    description: string
+    collectionId: string
+  }[] = []
 
   console.log('Seeding snippets...')
   for (const snippet of snippets) {
@@ -352,7 +280,7 @@ echo "Deployment complete!"`,
     const exists = await prisma.item.findFirst({
       where: { title: cmd.title, userId: user.id },
     })
-    const typeId = cmd.title === 'Deploy Script' ? createdTypes['snippet'] : createdTypes['command']
+    const typeId = createdTypes['command']
     if (!exists) {
       const item = await prisma.item.create({
         data: {
