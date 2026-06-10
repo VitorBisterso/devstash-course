@@ -11,6 +11,7 @@ import type { SystemItemType } from "@/lib/db/items";
 import type { CollectionWithTypes } from "@/lib/db/collections";
 import type { ItemWithType } from "@/lib/db/items";
 import { Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { SearchData } from "@/lib/db/search";
 
 export interface SidebarData {
@@ -74,6 +75,11 @@ export function DashboardShell({
         >
           New
         </button>
+        {!sidebarData.isPro && (
+          <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/upgrade" />}>
+            Upgrade
+          </Button>
+        )}
         <button
           className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 gap-2"
           onClick={() => setCreateCollectionModalOpen(true)}

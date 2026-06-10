@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles, FileCode, Image, Infinity, Zap, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface UpgradeContentProps {
@@ -10,22 +11,15 @@ interface UpgradeContentProps {
   yearlyPriceId: string;
 }
 
-const features = [
-  { icon: Infinity, text: "Unlimited items and collections" },
-  { icon: Zap, text: "Upload files and images" },
-  { icon: Shield, text: "Priority support" },
-];
-
-const proTypes = [
-  { icon: FileCode, label: "Files", color: "text-blue-500" },
-  { icon: Image, label: "Images", color: "text-green-500" },
-];
+const FREE_FEATURES = ["50 items", "3 collections", "Basic search", "Community support"];
+const PRO_FEATURES = ["Unlimited items", "Unlimited collections", "AI features", "File uploads", "Priority support"];
 
 export function UpgradeContent({ monthlyPriceId, yearlyPriceId }: UpgradeContentProps) {
-  const [loading, setLoading] = useState(false);
+  const [yearly, setYearly] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
 
   async function handleUpgrade(priceId: string) {
-    setLoading(true);
+    setLoading(priceId);
     try {
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -45,73 +39,111 @@ export function UpgradeContent({ monthlyPriceId, yearlyPriceId }: UpgradeContent
     } catch {
       toast.error("Something went wrong");
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   }
 
+  const proPrice = yearly ? "$72" : "$8";
+  const proPeriod = yearly ? "/yr" : "/mo";
+
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="max-w-lg w-full space-y-8 text-center">
-        <div className="space-y-4">
-          <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10">
-            <Sparkles className="h-8 w-8 text-primary" />
+    <div className="max-w-[640px] mx-auto py-12 space-y-8">
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10">
+          <Sparkles className="h-8 w-8 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold">Upgrade to Pro</h1>
+        <p className="text-muted-foreground">
+          Unlock unlimited items, collections, file uploads and more.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-center gap-3">
+        <span
+          className={`text-sm font-medium transition-colors ${
+            !yearly ? "text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          Monthly
+        </span>
+        <button
+          onClick={() => setYearly(!yearly)}
+          className="relative inline-block w-12 h-[26px] cursor-pointer"
+          aria-label="Toggle pricing"
+        >
+          <span
+            className={`absolute inset-0 rounded-full border transition-colors ${
+              yearly ? "border-primary" : "border-border"
+            } bg-secondary`}
+          />
+          <span
+            className={`absolute top-[3px] left-[3px] h-5 w-5 rounded-full bg-primary transition-transform duration-300 ${
+              yearly ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
+        </button>
+        <span
+          className={`text-sm font-medium transition-colors ${
+            yearly ? "text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          Yearly{" "}
+          <span className="text-green-500 text-xs font-semibold">Save 25%</span>
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-card border border-border rounded-2xl p-9">
+          <h3 className="text-xl font-bold mb-4">Free</h3>
+          <div className="text-4xl font-extrabold mb-1">
+            $0<span className="text-base text-muted-foreground font-medium">/mo</span>
           </div>
-          <h1 className="text-3xl font-bold">Upgrade to Pro</h1>
-          <p className="text-muted-foreground">
-            Files and images are available exclusively for Pro users.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center gap-4">
-          {proTypes.map((type) => (
-            <div
-              key={type.label}
-              className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2"
-            >
-              <type.icon className={`h-5 w-5 ${type.color}`} />
-              <span className="font-medium">{type.label}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="rounded-lg border bg-card p-6 text-left space-y-4">
-          <h2 className="font-semibold text-center">What you get:</h2>
-          <ul className="space-y-3">
-            {features.map((feature) => (
-              <li key={feature.text} className="flex items-center gap-3">
-                <feature.icon className="h-5 w-5 text-primary flex-shrink-0" />
-                <span>{feature.text}</span>
+          <p className="text-sm text-muted-foreground mb-6">For getting started</p>
+          <ul className="flex flex-col gap-3 mb-7">
+            {FREE_FEATURES.map((f) => (
+              <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <Check className="h-[18px] w-[18px] text-green-500 shrink-0" />
+                {f}
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button
-            size="lg"
-            onClick={() => handleUpgrade(monthlyPriceId)}
-            disabled={loading}
-            className="gap-2"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            $8 / month
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => handleUpgrade(yearlyPriceId)}
-            disabled={loading}
-            className="gap-2"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            $72 / year
+          <Button variant="outline" className="w-full" disabled>
+            Current Plan
           </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Cancel anytime. No hidden fees.
-        </p>
+        <div className="bg-card border border-primary rounded-2xl p-9 relative bg-gradient-to-br from-primary/[0.08] to-primary/[0.05]">
+          <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
+            Most Popular
+          </Badge>
+          <h3 className="text-xl font-bold mb-4">Pro</h3>
+          <div className="text-4xl font-extrabold mb-1">
+            {proPrice}
+            <span className="text-base text-muted-foreground font-medium">{proPeriod}</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">For serious developers</p>
+          <ul className="flex flex-col gap-3 mb-7">
+            {PRO_FEATURES.map((f) => (
+              <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <Check className="h-[18px] w-[18px] text-green-500 shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
+          <Button
+            className="w-full gap-2"
+            onClick={() => handleUpgrade(yearly ? yearlyPriceId : monthlyPriceId)}
+            disabled={loading !== null}
+          >
+            {loading !== null && <Loader2 className="h-4 w-4 animate-spin" />}
+            Upgrade
+          </Button>
+        </div>
       </div>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Cancel anytime. No hidden fees.
+      </p>
     </div>
   );
 }
