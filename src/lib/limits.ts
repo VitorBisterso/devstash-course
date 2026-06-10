@@ -41,3 +41,7 @@ export async function isUserPro(userId: string): Promise<boolean> {
 
   return user?.isPro ?? false;
 }
+
+export async function canUseAI(userId: string): Promise<boolean> {
+  return isUserPro(userId);
+}

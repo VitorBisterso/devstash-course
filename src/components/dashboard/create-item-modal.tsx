@@ -25,6 +25,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/u
 import { toast } from "sonner";
 import { ItemTypeSelect } from "./item-type-select";
 import { ContentEditor, FileField, UrlField } from "./item-form-fields";
+import { SuggestTags } from "./suggest-tags";
 
 interface SystemItemType {
   id: string;
@@ -243,6 +244,17 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
                 className="col-span-3"
                 placeholder="Comma-separated tags"
               />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <div className="col-start-2 col-span-3">
+                <SuggestTags
+                  title={title}
+                  description={description}
+                  content={content}
+                  currentTags={tags}
+                  onTagsChange={setTags}
+                />
+              </div>
             </div>
 
             {collections.length > 0 && (

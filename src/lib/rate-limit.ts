@@ -80,3 +80,8 @@ export const uploadRatelimit = {
   ratelimit: createRateLimiter(20, 60, "ratelimit:upload"),
   keyType: "user-id" as const,
 };
+
+export const aiRatelimits = {
+  tags: createRateLimiter(10, 3600, "ratelimit:ai:tags"),
+  keyType: "user-id" as const,
+};

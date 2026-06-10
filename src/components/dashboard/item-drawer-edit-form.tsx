@@ -15,6 +15,7 @@ import { MarkdownEditor } from "./markdown-editor";
 import { LanguageSelect } from "./language-select";
 import { isCodeType } from "@/lib/item-types";
 import type { ItemDetail } from "@/lib/db/items";
+import { SuggestTags } from "./suggest-tags";
 
 interface EditFormData {
   title: string;
@@ -64,6 +65,13 @@ export function ItemDrawerEditForm({
         <p className="text-xs text-muted-foreground mt-1">
           Separate tags with commas
         </p>
+        <SuggestTags
+          title={formData.title}
+          description={formData.description}
+          content={formData.content}
+          currentTags={formData.tags}
+          onTagsChange={(tags) => onFormDataChange({ tags })}
+        />
       </div>
 
       {collections.length > 0 && (

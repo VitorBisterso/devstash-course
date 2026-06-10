@@ -13,4 +13,5 @@ export const PRO_FEATURES = [
   "Unlimited collections",
   "Priority support",
   "Advanced search",
+  "AI features",
 ] as const;
