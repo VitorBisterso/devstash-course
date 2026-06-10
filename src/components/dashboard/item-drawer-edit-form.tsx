@@ -12,6 +12,7 @@ import { Loader2, Save, X, Check, ChevronsUpDown } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
+import { LanguageSelect } from "./language-select";
 import { isCodeType } from "@/lib/item-types";
 import type { ItemDetail } from "@/lib/db/items";
 
@@ -122,6 +123,16 @@ export function ItemDrawerEditForm({
         </div>
       )}
 
+      {showLanguageField && (
+        <div>
+          <Label htmlFor="edit-language" className="mb-1 block">Language</Label>
+          <LanguageSelect
+            value={formData.language}
+            onChange={(val) => onFormDataChange({ language: val })}
+          />
+        </div>
+      )}
+
       {showContentEditor && (
         <div>
           <Label htmlFor="edit-content" className="mb-1 block">Content</Label>
@@ -137,18 +148,6 @@ export function ItemDrawerEditForm({
               onChange={(val) => onFormDataChange({ content: val })}
             />
           )}
-        </div>
-      )}
-
-      {showLanguageField && (
-        <div>
-          <Label htmlFor="edit-language" className="mb-1 block">Language</Label>
-          <Input
-            id="edit-language"
-            value={formData.language}
-            onChange={(e) => onFormDataChange({ language: e.target.value })}
-            placeholder="e.g., javascript, python"
-          />
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
+import { LanguageSelect } from "./language-select";
 import { FileUpload } from "./file-upload";
 import { isContentType, isCodeType } from "@/lib/item-types";
 
@@ -28,6 +29,20 @@ export function ContentEditor({
 
   return (
     <>
+      {isCodeType(typeName) && (
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="language" className="text-right">
+            Language
+          </Label>
+          <div className="col-span-3">
+            <LanguageSelect
+              value={language}
+              onChange={onLanguageChange}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-4 items-start gap-4">
         <Label htmlFor="content" className="text-right pt-2">
           Content
@@ -47,21 +62,6 @@ export function ContentEditor({
           )}
         </div>
       </div>
-
-      {isCodeType(typeName) && (
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="language" className="text-right">
-            Language
-          </Label>
-          <Input
-            id="language"
-            value={language}
-            onChange={(e) => onLanguageChange(e.target.value)}
-            className="col-span-3"
-            placeholder="e.g., javascript, python, go"
-          />
-        </div>
-      )}
     </>
   );
 }
