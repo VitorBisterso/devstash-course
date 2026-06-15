@@ -11,6 +11,7 @@ import {
 export const AI_TAGS_CONTENT_MAX = 2000;
 export const AI_DESCRIPTION_CONTENT_MAX = 4000;
 export const AI_EXPLAIN_CONTENT_MAX = 8000;
+export const AI_OPTIMIZE_CONTENT_MAX = 8000;
 
 export const MINUTE_MS = 60 * 1000;
 export const HOUR_MS = 60 * MINUTE_MS;

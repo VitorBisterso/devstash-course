@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai, { AI_MODEL } from "@/lib/openai";
 import { aiRatelimits, checkRateLimit } from "@/lib/rate-limit";
-import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX, AI_EXPLAIN_CONTENT_MAX } from "@/lib/constants";
+import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX, AI_EXPLAIN_CONTENT_MAX, AI_OPTIMIZE_CONTENT_MAX } from "@/lib/constants";
 
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1).max(500),
@@ -291,5 +291,92 @@ export async function explainCode(data: unknown): Promise<ExplainCodeResult> {
     }
     console.error("Failed to generate code explanation:", error);
     return { success: false, error: "Failed to generate code explanation" };
+  }
+}
+
+const optimizePromptSchema = z.object({
+  title: z.string().min(1).max(500),
+  content: z.string().min(1).max(10000),
+});
+
+export type OptimizePromptInput = z.infer<typeof optimizePromptSchema>;
+
+export interface OptimizePromptResult {
+  success: boolean;
+  data?: { optimized: string };
+  error?: string;
+}
+
+export async function optimizePrompt(data: unknown): Promise<OptimizePromptResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  if (!(await canUseAI(session.user.id))) {
+    return { success: false, error: "AI features require a Pro subscription" };
+  }
+
+  const parsed = optimizePromptSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return { success: false, error: "Invalid input" };
+  }
+
+  const rateLimitResult = await checkRateLimit(aiRatelimits.optimize, session.user.id);
+
+  if (!rateLimitResult.success) {
+    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+    return {
+      success: false,
+      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+    };
+  }
+
+  try {
+    let text = `Return JSON with the optimized version of this prompt:\nTitle: ${parsed.data.title}`;
+    if (parsed.data.content) {
+      const truncated = parsed.data.content.length > AI_OPTIMIZE_CONTENT_MAX
+        ? parsed.data.content.slice(0, AI_OPTIMIZE_CONTENT_MAX) + "..."
+        : parsed.data.content;
+      text += `\n\nPrompt:\n${truncated}`;
+    }
+
+    const response = await openai.responses.create({
+      model: AI_MODEL,
+      instructions:
+        "You are a prompt engineering expert. Analyze the given prompt and refine it to be more " +
+        "effective, clear, and specific. Improve structure, add context where helpful, and ensure " +
+        "the prompt guides the AI toward the desired output. Keep the same core intent but make it " +
+        "more precise and actionable. Return the optimized version in JSON format: " +
+        '{ "optimized": "the optimized prompt here" }',
+      input: text,
+      text: {
+        format: { type: "json_object" },
+      },
+    });
+
+    const raw = JSON.parse(response.output_text);
+
+    if (raw && typeof raw === "object" && "optimized" in raw) {
+      const optimized = String(raw.optimized).trim();
+      if (optimized.length > 0) {
+        return { success: true, data: { optimized } };
+      }
+    }
+
+    return { success: false, error: "Could not optimize prompt. Try again." };
+  } catch (error) {
+    if (error instanceof OpenAI.APIError) {
+      console.error("OpenAI API error:", error.status, error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    if (error instanceof OpenAI.APIConnectionError) {
+      console.error("OpenAI connection error:", error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    console.error("Failed to optimize prompt:", error);
+    return { success: false, error: "Failed to optimize prompt" };
   }
 }

@@ -19,7 +19,7 @@ import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
 import { formatFileSize } from "@/lib/format";
 import type { ItemDetail } from "@/lib/db/items";
-import { explainCode } from "@/actions/ai";
+import { explainCode, optimizePrompt } from "@/actions/ai";
 import { getSubscriptionStatus } from "@/actions/billing";
 import { toast } from "sonner";
 
@@ -106,6 +106,8 @@ export function ItemDrawerContent({ item, isCodeType }: ItemDrawerContentProps) 
   const [isPro, setIsPro] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
   const [explainLoading, setExplainLoading] = useState(false);
+  const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
+  const [optimizeLoading, setOptimizeLoading] = useState(false);
 
   useEffect(() => {
     getSubscriptionStatus().then((status) => {
@@ -131,6 +133,28 @@ export function ItemDrawerContent({ item, isCodeType }: ItemDrawerContentProps) 
       toast.error("Failed to generate explanation");
     } finally {
       setExplainLoading(false);
+    }
+  };
+
+  const isPromptType = item.type.name.toLowerCase() === "prompt";
+
+  const handleOptimize = async () => {
+    if (!item.content) return;
+    setOptimizeLoading(true);
+    try {
+      const result = await optimizePrompt({
+        title: item.title,
+        content: item.content,
+      });
+      if (result.success && result.data) {
+        setOptimizedPrompt(result.data.optimized);
+      } else {
+        toast.error(result.error || "Failed to optimize prompt");
+      }
+    } catch {
+      toast.error("Failed to optimize prompt");
+    } finally {
+      setOptimizeLoading(false);
     }
   };
 
@@ -168,6 +192,11 @@ export function ItemDrawerContent({ item, isCodeType }: ItemDrawerContentProps) 
               key={item.id}
               value={item.content}
               readOnly
+              showOptimize={isPromptType}
+              isPro={isPro}
+              optimizedPrompt={optimizedPrompt}
+              optimizeLoading={optimizeLoading}
+              onOptimize={handleOptimize}
             />
           )}
         </div>

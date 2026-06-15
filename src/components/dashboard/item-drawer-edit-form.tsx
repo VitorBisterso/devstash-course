@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ import { LanguageSelect } from "./language-select";
 import { isCodeType } from "@/lib/item-types";
 import type { ItemDetail } from "@/lib/db/items";
 import { SuggestTags } from "./suggest-tags";
+import { optimizePrompt } from "@/actions/ai";
+import { getSubscriptionStatus } from "@/actions/billing";
+import { toast } from "sonner";
 
 interface EditFormData {
   title: string;
@@ -51,6 +55,48 @@ export function ItemDrawerEditForm({
   const showContentEditor = typeSpecificField === "content";
   const showLanguageField = typeSpecificField === "content" && isCodeType(item.type.name);
   const showUrlField = typeSpecificField === "url";
+  const [isPro, setIsPro] = useState(false);
+  const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
+  const [optimizeLoading, setOptimizeLoading] = useState(false);
+
+  useEffect(() => {
+    getSubscriptionStatus().then((status) => {
+      setIsPro(status.isPro);
+    });
+  }, []);
+
+  const isPromptType = item.type.name.toLowerCase() === "prompt";
+
+  const handleOptimize = async () => {
+    if (!formData.content.trim()) {
+      toast.error("Add content first");
+      return;
+    }
+    setOptimizeLoading(true);
+    try {
+      const result = await optimizePrompt({
+        title: formData.title.trim() || "Untitled",
+        content: formData.content,
+      });
+      if (result.success && result.data) {
+        setOptimizedPrompt(result.data.optimized);
+      } else {
+        toast.error(result.error || "Failed to optimize prompt");
+      }
+    } catch {
+      toast.error("Failed to optimize prompt");
+    } finally {
+      setOptimizeLoading(false);
+    }
+  };
+
+  const handleApplyOptimized = () => {
+    if (optimizedPrompt) {
+      onFormDataChange({ content: optimizedPrompt });
+      setOptimizedPrompt(null);
+      toast.success("Optimized prompt applied");
+    }
+  };
 
   return (
     <div className="mt-4 space-y-4">
@@ -154,6 +200,12 @@ export function ItemDrawerEditForm({
             <MarkdownEditor
               value={formData.content}
               onChange={(val) => onFormDataChange({ content: val })}
+              showOptimize={isPromptType}
+              isPro={isPro}
+              optimizedPrompt={optimizedPrompt}
+              optimizeLoading={optimizeLoading}
+              onOptimize={handleOptimize}
+              onApplyOptimized={handleApplyOptimized}
             />
           )}
         </div>

@@ -14,6 +14,12 @@ interface ContentEditorProps {
   language: string;
   onContentChange: (value: string) => void;
   onLanguageChange: (value: string) => void;
+  showOptimize?: boolean;
+  isPro?: boolean;
+  optimizedPrompt?: string | null;
+  optimizeLoading?: boolean;
+  onOptimize?: () => void;
+  onApplyOptimized?: () => void;
 }
 
 export function ContentEditor({
@@ -22,6 +28,12 @@ export function ContentEditor({
   language,
   onContentChange,
   onLanguageChange,
+  showOptimize,
+  isPro,
+  optimizedPrompt,
+  optimizeLoading,
+  onOptimize,
+  onApplyOptimized,
 }: ContentEditorProps) {
   if (!isContentType(typeName)) {
     return null;
@@ -58,6 +70,12 @@ export function ContentEditor({
             <MarkdownEditor
               value={content}
               onChange={onContentChange}
+              showOptimize={showOptimize}
+              isPro={isPro}
+              optimizedPrompt={optimizedPrompt}
+              optimizeLoading={optimizeLoading}
+              onOptimize={onOptimize}
+              onApplyOptimized={onApplyOptimized}
             />
           )}
         </div>

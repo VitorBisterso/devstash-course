@@ -3,13 +3,19 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Check, Copy } from "lucide-react";
+import { Sparkles, Crown, Loader2, Check, Copy } from "lucide-react";
 
 interface MarkdownEditorProps {
   value: string;
   onChange?: (value: string) => void;
   readOnly?: boolean;
   minHeight?: number;
+  showOptimize?: boolean;
+  isPro?: boolean;
+  optimizedPrompt?: string | null;
+  optimizeLoading?: boolean;
+  onOptimize?: () => void;
+  onApplyOptimized?: () => void;
 }
 
 export function MarkdownEditor({
@@ -17,9 +23,15 @@ export function MarkdownEditor({
   onChange,
   readOnly = false,
   minHeight = 100,
+  showOptimize = false,
+  isPro = false,
+  optimizedPrompt = null,
+  optimizeLoading = false,
+  onOptimize,
+  onApplyOptimized,
 }: MarkdownEditorProps) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"write" | "preview">(
+  const [activeTab, setActiveTab] = useState<"write" | "preview" | "original" | "optimized">(
     readOnly ? "preview" : "write"
   );
 
@@ -29,7 +41,21 @@ export function MarkdownEditor({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const tabs = readOnly ? ["preview"] : ["write", "preview"];
+  const showCompare = showOptimize && optimizedPrompt;
+
+  const tabs = showCompare
+    ? ["original", "optimized"]
+    : readOnly
+      ? ["preview"]
+      : ["write", "preview"];
+
+  const defaultTab = showCompare ? "original" : readOnly ? "preview" : "write" as "write" | "preview" | "original" | "optimized";
+
+  if (activeTab !== defaultTab && !tabs.includes(activeTab)) {
+    setActiveTab(defaultTab);
+  }
+
+  const displayValue = showCompare && activeTab === "optimized" ? optimizedPrompt : value;
 
   return (
     <div className="rounded-lg border border-input overflow-hidden bg-[#1e1e1e]">
@@ -44,7 +70,7 @@ export function MarkdownEditor({
             {tabs.map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab as "write" | "preview")}
+                onClick={() => setActiveTab(tab as "write" | "preview" | "original" | "optimized")}
                 className={`px-3 py-1 text-xs rounded transition-colors ${
                   activeTab === tab
                     ? "bg-[#1e1e1e] text-foreground"
@@ -56,25 +82,64 @@ export function MarkdownEditor({
             ))}
           </div>
         </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3 h-3" />
-              <span>Copied</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3 h-3" />
-              <span>Copy</span>
-            </>
+        <div className="flex items-center gap-1">
+          {showOptimize && !showCompare && !optimizeLoading && (
+            isPro ? (
+              <button
+                onClick={onOptimize}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-[#3d3d3d]"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>Optimize</span>
+              </button>
+            ) : (
+              <span
+                title="AI features require Pro subscription"
+                className="flex items-center gap-1 text-xs text-muted-foreground/50 cursor-not-allowed px-1.5 py-0.5"
+              >
+                <Crown className="w-3 h-3" />
+                <span>Optimize</span>
+              </span>
+            )
           )}
-        </button>
+          {showOptimize && optimizeLoading && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground px-1.5 py-0.5">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>Optimizing...</span>
+            </span>
+          )}
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3 h-3" />
+                <span>Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
+      {showCompare && activeTab === "optimized" && onApplyOptimized && (
+        <div className="flex items-center justify-between px-4 py-2 bg-emerald-950/30 border-b border-emerald-900/50">
+          <span className="text-xs text-emerald-400 font-medium">Optimized version</span>
+          <button
+            onClick={onApplyOptimized}
+            className="flex items-center gap-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded transition-colors"
+          >
+            <Check className="w-3 h-3" />
+            <span>Use This Version</span>
+          </button>
+        </div>
+      )}
       <div className="overflow-auto" style={{ maxHeight: 400 }}>
-        {activeTab === "write" ? (
+        {activeTab === "write" && !showCompare ? (
           <textarea
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
@@ -89,7 +154,7 @@ export function MarkdownEditor({
             style={{ minHeight: Math.max(minHeight, 100) }}
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {value}
+              {displayValue}
             </ReactMarkdown>
           </div>
         )}

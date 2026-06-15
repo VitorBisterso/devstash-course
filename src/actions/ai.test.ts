@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import OpenAI from "openai";
-import { generateAutoTags, generateDescription, explainCode } from "./ai";
+import { generateAutoTags, generateDescription, explainCode, optimizePrompt } from "./ai";
 import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai from "@/lib/openai";
@@ -503,5 +503,151 @@ describe("explainCode", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toBe("Could not generate explanation. Try again.");
+  });
+});
+
+const mockOptimizeResponse = (optimized: string) => ({
+  output_text: JSON.stringify({ optimized }),
+});
+
+describe("optimizePrompt", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(auth).mockResolvedValue(mockSession);
+    vi.mocked(canUseAI).mockResolvedValue(true);
+    vi.mocked(checkRateLimit).mockResolvedValue(mockRateLimitSuccess);
+  });
+
+  it("returns unauthorized without session", async () => {
+    vi.mocked(auth).mockResolvedValue(null);
+
+    const result = await optimizePrompt({ title: "Test", content: "Write a poem about code" });
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("returns unauthorized without user id", async () => {
+    vi.mocked(auth).mockResolvedValue({ user: {} });
+
+    const result = await optimizePrompt({ title: "Test", content: "Write a poem about code" });
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("gates on Pro subscription", async () => {
+    vi.mocked(canUseAI).mockResolvedValue(false);
+
+    const result = await optimizePrompt({ title: "Test", content: "Write a poem about code" });
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI features require a Pro subscription",
+    });
+  });
+
+  it("returns error on invalid input", async () => {
+    const result = await optimizePrompt({});
+
+    expect(result).toEqual({ success: false, error: "Invalid input" });
+  });
+
+  it("returns error on empty title", async () => {
+    const result = await optimizePrompt({ title: "", content: "Write a poem" });
+
+    expect(result).toEqual({ success: false, error: "Invalid input" });
+  });
+
+  it("returns error on empty content", async () => {
+    const result = await optimizePrompt({ title: "Test", content: "" });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Invalid input");
+  });
+
+  it("returns rate limit error when exceeded", async () => {
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      success: false,
+      remaining: 0,
+      reset: Date.now() + 60000,
+    });
+
+    const result = await optimizePrompt({ title: "Test", content: "Write a poem" });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Rate limit exceeded");
+  });
+
+  it("optimizes prompt successfully", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue(
+      mockOptimizeResponse("Write a creative and engaging poem about the beauty of code.")
+    );
+
+    const result = await optimizePrompt({
+      title: "Poem Prompt",
+      content: "Write a poem about code",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.optimized).toBe("Write a creative and engaging poem about the beauty of code.");
+  });
+
+  it("handles OpenAI API errors", async () => {
+    const apiError = new OpenAI.APIError(500, { message: "Internal Server Error" }, "error", { get: () => undefined });
+    vi.mocked(openai.responses.create).mockRejectedValue(apiError);
+
+    const result = await optimizePrompt({
+      title: "Test",
+      content: "Write a poem",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI service temporarily unavailable",
+    });
+  });
+
+  it("truncates content over 8000 chars", async () => {
+    const longContent = "a".repeat(10000);
+    vi.mocked(openai.responses.create).mockResolvedValue(
+      mockOptimizeResponse("Short optimized version.")
+    );
+
+    await optimizePrompt({
+      title: "Test",
+      content: longContent,
+    });
+
+    const callArg = vi.mocked(openai.responses.create).mock.calls[0][0];
+    const input = callArg.input as string;
+    expect(input.length).toBeLessThanOrEqual(8500);
+    expect(input).toContain("...");
+  });
+
+  it("returns error when optimized field is missing from response", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue({
+      output_text: JSON.stringify({ foo: "bar" }),
+    });
+
+    const result = await optimizePrompt({
+      title: "Test",
+      content: "Write a poem",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Could not optimize prompt. Try again.");
+  });
+
+  it("returns error when optimized is empty string", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue({
+      output_text: JSON.stringify({ optimized: "" }),
+    });
+
+    const result = await optimizePrompt({
+      title: "Test",
+      content: "Write a poem",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Could not optimize prompt. Try again.");
   });
 });

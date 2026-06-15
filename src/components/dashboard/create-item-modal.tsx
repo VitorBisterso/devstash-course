@@ -27,6 +27,8 @@ import { ItemTypeSelect } from "./item-type-select";
 import { ContentEditor, FileField, UrlField } from "./item-form-fields";
 import { SuggestTags } from "./suggest-tags";
 import { SuggestDescription } from "./suggest-description";
+import { optimizePrompt } from "@/actions/ai";
+import { getSubscriptionStatus } from "@/actions/billing";
 
 interface SystemItemType {
   id: string;
@@ -62,6 +64,9 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [fileData, setFileData] = useState<FileData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
+  const [optimizeLoading, setOptimizeLoading] = useState(false);
 
   useEffect(() => {
     if (open && itemTypes.length === 0) {
@@ -74,6 +79,12 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
       getCollections().then(setCollections);
     }
   }, [open, collections.length]);
+
+  useEffect(() => {
+    getSubscriptionStatus().then((status) => {
+      setIsPro(status.isPro);
+    });
+  }, []);
 
   const resetForm = () => {
     setSelectedType("");
@@ -93,6 +104,37 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
       resetForm();
     }
     onOpenChange(isOpen);
+  };
+
+  const handleOptimize = async () => {
+    if (!content.trim()) {
+      toast.error("Add content first");
+      return;
+    }
+    setOptimizeLoading(true);
+    try {
+      const result = await optimizePrompt({
+        title: title.trim() || "Untitled",
+        content,
+      });
+      if (result.success && result.data) {
+        setOptimizedPrompt(result.data.optimized);
+      } else {
+        toast.error(result.error || "Failed to optimize prompt");
+      }
+    } catch {
+      toast.error("Failed to optimize prompt");
+    } finally {
+      setOptimizeLoading(false);
+    }
+  };
+
+  const handleApplyOptimized = () => {
+    if (optimizedPrompt) {
+      setContent(optimizedPrompt);
+      setOptimizedPrompt(null);
+      toast.success("Optimized prompt applied");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -161,6 +203,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
   const typeName = selectedTypeName.toLowerCase();
   const isLinkType = typeName === "link";
   const isFileType = ["file", "image"].includes(typeName);
+  const isPromptType = typeName === "prompt";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -180,6 +223,7 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
               onChange={(id, name) => {
                 setSelectedType(id);
                 setSelectedTypeName(name);
+                setOptimizedPrompt(null);
               }}
             />
 
@@ -211,6 +255,12 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
               language={language}
               onContentChange={setContent}
               onLanguageChange={setLanguage}
+              showOptimize={isPromptType}
+              isPro={isPro}
+              optimizedPrompt={optimizedPrompt}
+              optimizeLoading={optimizeLoading}
+              onOptimize={handleOptimize}
+              onApplyOptimized={handleApplyOptimized}
             />
 
             {isFileType && (
