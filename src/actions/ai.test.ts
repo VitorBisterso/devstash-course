@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import OpenAI from "openai";
-import { generateAutoTags, generateDescription } from "./ai";
+import { generateAutoTags, generateDescription, explainCode } from "./ai";
 import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai from "@/lib/openai";
@@ -343,5 +343,165 @@ describe("generateDescription", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toBe("Could not generate description. Try again.");
+  });
+});
+
+const mockExplanationResponse = (explanation: string) => ({
+  output_text: JSON.stringify({ explanation }),
+});
+
+describe("explainCode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(auth).mockResolvedValue(mockSession);
+    vi.mocked(canUseAI).mockResolvedValue(true);
+    vi.mocked(checkRateLimit).mockResolvedValue(mockRateLimitSuccess);
+  });
+
+  it("returns unauthorized without session", async () => {
+    vi.mocked(auth).mockResolvedValue(null);
+
+    const result = await explainCode({ title: "Test", content: "console.log('hello');" });
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("returns unauthorized without user id", async () => {
+    vi.mocked(auth).mockResolvedValue({ user: {} });
+
+    const result = await explainCode({ title: "Test", content: "console.log('hello');" });
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("gates on Pro subscription", async () => {
+    vi.mocked(canUseAI).mockResolvedValue(false);
+
+    const result = await explainCode({ title: "Test", content: "console.log('hello');" });
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI features require a Pro subscription",
+    });
+  });
+
+  it("returns error on invalid input", async () => {
+    const result = await explainCode({});
+
+    expect(result).toEqual({ success: false, error: "Invalid input" });
+  });
+
+  it("returns error on empty title", async () => {
+    const result = await explainCode({ title: "", content: "console.log('hello');" });
+
+    expect(result).toEqual({ success: false, error: "Invalid input" });
+  });
+
+  it("returns error on empty content", async () => {
+    const result = await explainCode({ title: "Test", content: "" });
+
+    expect(result).toEqual({ success: false, error: "Invalid input" });
+  });
+
+  it("returns rate limit error when exceeded", async () => {
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      success: false,
+      remaining: 0,
+      reset: Date.now() + 60000,
+    });
+
+    const result = await explainCode({ title: "Test", content: "console.log('hello');" });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Rate limit exceeded");
+  });
+
+  it("generates explanation successfully", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue(
+      mockExplanationResponse("This code logs `hello` to the console using JavaScript's `console.log` method.")
+    );
+
+    const result = await explainCode({
+      title: "Hello World",
+      content: "console.log('hello');",
+      language: "javascript",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.explanation).toBe("This code logs `hello` to the console using JavaScript's `console.log` method.");
+  });
+
+  it("generates explanation without language", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue(
+      mockExplanationResponse("A simple print statement.")
+    );
+
+    const result = await explainCode({
+      title: "Print",
+      content: 'print("hello")',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.explanation).toBe("A simple print statement.");
+  });
+
+  it("handles OpenAI API errors", async () => {
+    const apiError = new OpenAI.APIError(500, { message: "Internal Server Error" }, "error", { get: () => undefined });
+    vi.mocked(openai.responses.create).mockRejectedValue(apiError);
+
+    const result = await explainCode({
+      title: "Test",
+      content: "console.log('hello');",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI service temporarily unavailable",
+    });
+  });
+
+  it("truncates content over 8000 chars", async () => {
+    const longContent = "a".repeat(10000);
+    vi.mocked(openai.responses.create).mockResolvedValue(
+      mockExplanationResponse("A long piece of code.")
+    );
+
+    await explainCode({
+      title: "Test",
+      content: longContent,
+    });
+
+    const callArg = vi.mocked(openai.responses.create).mock.calls[0][0];
+    const input = callArg.input as string;
+    expect(input.length).toBeLessThanOrEqual(8500);
+    expect(input).toContain("...");
+  });
+
+  it("returns error when explanation field is missing from response", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue({
+      output_text: JSON.stringify({ foo: "bar" }),
+    });
+
+    const result = await explainCode({
+      title: "Test",
+      content: "console.log('hello');",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Could not generate explanation. Try again.");
+  });
+
+  it("returns error when explanation is empty string", async () => {
+    vi.mocked(openai.responses.create).mockResolvedValue({
+      output_text: JSON.stringify({ explanation: "" }),
+    });
+
+    const result = await explainCode({
+      title: "Test",
+      content: "console.log('hello');",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Could not generate explanation. Try again.");
   });
 });

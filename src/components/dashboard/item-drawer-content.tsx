@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,9 @@ import { CodeEditor } from "./code-editor";
 import { MarkdownEditor } from "./markdown-editor";
 import { formatFileSize } from "@/lib/format";
 import type { ItemDetail } from "@/lib/db/items";
+import { explainCode } from "@/actions/ai";
+import { getSubscriptionStatus } from "@/actions/billing";
+import { toast } from "sonner";
 
 interface ItemDrawerActionsProps {
   item: ItemDetail;
@@ -99,6 +103,37 @@ interface ItemDrawerContentProps {
 }
 
 export function ItemDrawerContent({ item, isCodeType }: ItemDrawerContentProps) {
+  const [isPro, setIsPro] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explainLoading, setExplainLoading] = useState(false);
+
+  useEffect(() => {
+    getSubscriptionStatus().then((status) => {
+      setIsPro(status.isPro);
+    });
+  }, []);
+
+  const handleExplain = async () => {
+    if (!item.content) return;
+    setExplainLoading(true);
+    try {
+      const result = await explainCode({
+        title: item.title,
+        content: item.content,
+        language: item.language,
+      });
+      if (result.success && result.data) {
+        setExplanation(result.data.explanation);
+      } else {
+        toast.error(result.error || "Failed to generate explanation");
+      }
+    } catch {
+      toast.error("Failed to generate explanation");
+    } finally {
+      setExplainLoading(false);
+    }
+  };
+
   return (
     <div className="mt-6 space-y-4">
       {item.url && (
@@ -118,12 +153,19 @@ export function ItemDrawerContent({ item, isCodeType }: ItemDrawerContentProps) 
         <div>
           {isCodeType ? (
             <CodeEditor
+              key={item.id}
               value={item.content}
               readOnly
               language={item.language || "plaintext"}
+              showExplain
+              isPro={isPro}
+              explanation={explanation}
+              explainLoading={explainLoading}
+              onExplain={handleExplain}
             />
           ) : (
             <MarkdownEditor
+              key={item.id}
               value={item.content}
               readOnly
             />

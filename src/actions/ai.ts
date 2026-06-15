@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai, { AI_MODEL } from "@/lib/openai";
 import { aiRatelimits, checkRateLimit } from "@/lib/rate-limit";
-import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX } from "@/lib/constants";
+import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX, AI_EXPLAIN_CONTENT_MAX } from "@/lib/constants";
 
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1).max(500),
@@ -201,5 +201,95 @@ export async function generateDescription(data: unknown): Promise<GenerateDescri
     }
     console.error("Failed to generate description:", error);
     return { success: false, error: "Failed to generate description" };
+  }
+}
+
+const explainCodeSchema = z.object({
+  title: z.string().min(1).max(500),
+  content: z.string().min(1).max(10000),
+  language: z.string().max(50).nullable().optional(),
+});
+
+export type ExplainCodeInput = z.infer<typeof explainCodeSchema>;
+
+export interface ExplainCodeResult {
+  success: boolean;
+  data?: { explanation: string };
+  error?: string;
+}
+
+export async function explainCode(data: unknown): Promise<ExplainCodeResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  if (!(await canUseAI(session.user.id))) {
+    return { success: false, error: "AI features require a Pro subscription" };
+  }
+
+  const parsed = explainCodeSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return { success: false, error: "Invalid input" };
+  }
+
+  const rateLimitResult = await checkRateLimit(aiRatelimits.explain, session.user.id);
+
+  if (!rateLimitResult.success) {
+    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+    return {
+      success: false,
+      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+    };
+  }
+
+  try {
+    let text = `Return JSON explaining this code in ~200-300 words. Cover what the code does and key concepts.\nTitle: ${parsed.data.title}`;
+    if (parsed.data.content) {
+      const truncated = parsed.data.content.length > AI_EXPLAIN_CONTENT_MAX
+        ? parsed.data.content.slice(0, AI_EXPLAIN_CONTENT_MAX) + "..."
+        : parsed.data.content;
+      text += `\n\nCode:\n${truncated}`;
+    }
+    if (parsed.data.language) {
+      text += `\n\nLanguage: ${parsed.data.language}`;
+    }
+
+    const response = await openai.responses.create({
+      model: AI_MODEL,
+      instructions:
+        "You are a senior developer explaining code to other developers. " +
+        "Write a concise explanation (~200-300 words) covering what the code does, " +
+        "how it works, and key concepts involved. Use markdown for formatting. " +
+        "Respond in JSON format: { \"explanation\": \"your markdown explanation here\" }",
+      input: text,
+      text: {
+        format: { type: "json_object" },
+      },
+    });
+
+    const raw = JSON.parse(response.output_text);
+
+    if (raw && typeof raw === "object" && "explanation" in raw) {
+      const explanation = String(raw.explanation).trim();
+      if (explanation.length > 0) {
+        return { success: true, data: { explanation } };
+      }
+    }
+
+    return { success: false, error: "Could not generate explanation. Try again." };
+  } catch (error) {
+    if (error instanceof OpenAI.APIError) {
+      console.error("OpenAI API error:", error.status, error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    if (error instanceof OpenAI.APIConnectionError) {
+      console.error("OpenAI connection error:", error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    console.error("Failed to generate code explanation:", error);
+    return { success: false, error: "Failed to generate code explanation" };
   }
 }
