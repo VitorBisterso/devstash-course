@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { ItemTypeSelect } from "./item-type-select";
 import { ContentEditor, FileField, UrlField } from "./item-form-fields";
 import { SuggestTags } from "./suggest-tags";
+import { SuggestDescription } from "./suggest-description";
 
 interface SystemItemType {
   id: string;
@@ -231,6 +232,16 @@ export function CreateItemModal({ open, onOpenChange }: CreateItemModalProps) {
                 className="col-span-3"
                 placeholder="Optional description"
               />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <div className="col-start-2 col-span-3">
+                <SuggestDescription
+                  title={title}
+                  content={content}
+                  url={url}
+                  onDescriptionChange={setDescription}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
+import { SuggestDescription } from "./suggest-description";
 
 export function ItemDrawerLoading() {
   return (
@@ -47,6 +48,8 @@ export function ItemDrawerViewHeader({
 interface ItemDrawerEditHeaderProps {
   title: string;
   description: string;
+  content: string;
+  url: string;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
 }
@@ -54,6 +57,8 @@ interface ItemDrawerEditHeaderProps {
 export function ItemDrawerEditHeader({
   title,
   description,
+  content,
+  url,
   onTitleChange,
   onDescriptionChange,
 }: ItemDrawerEditHeaderProps) {
@@ -78,6 +83,14 @@ export function ItemDrawerEditHeader({
             placeholder="Optional description"
             className="w-full min-h-[60px] rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 resize-none"
           />
+          <div className="mt-2">
+            <SuggestDescription
+              title={title}
+              content={content}
+              url={url}
+              onDescriptionChange={onDescriptionChange}
+            />
+          </div>
         </div>
       </div>
     </SheetHeader>

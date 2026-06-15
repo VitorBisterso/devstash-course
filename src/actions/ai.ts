@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai, { AI_MODEL } from "@/lib/openai";
 import { aiRatelimits, checkRateLimit } from "@/lib/rate-limit";
-import { AI_TAGS_CONTENT_MAX } from "@/lib/constants";
+import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX } from "@/lib/constants";
 
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1).max(500),
@@ -112,5 +112,94 @@ export async function generateAutoTags(data: unknown): Promise<GenerateAutoTagsR
     }
     console.error("Failed to generate auto tags:", error);
     return { success: false, error: "Failed to generate auto tags" };
+  }
+}
+
+const generateDescriptionSchema = z.object({
+  title: z.string().min(1).max(500),
+  content: z.string().max(10000).nullable().optional(),
+  url: z.string().max(2000).nullable().optional(),
+});
+
+export type GenerateDescriptionInput = z.infer<typeof generateDescriptionSchema>;
+
+export interface GenerateDescriptionResult {
+  success: boolean;
+  data?: { description: string };
+  error?: string;
+}
+
+export async function generateDescription(data: unknown): Promise<GenerateDescriptionResult> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  if (!(await canUseAI(session.user.id))) {
+    return { success: false, error: "AI features require a Pro subscription" };
+  }
+
+  const parsed = generateDescriptionSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return { success: false, error: "Invalid input" };
+  }
+
+  const rateLimitResult = await checkRateLimit(aiRatelimits.description, session.user.id);
+
+  if (!rateLimitResult.success) {
+    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
+    return {
+      success: false,
+      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+    };
+  }
+
+  try {
+    let text = `Generate a JSON description for:\nTitle: ${parsed.data.title}`;
+    if (parsed.data.content) {
+      const truncated = parsed.data.content.length > AI_DESCRIPTION_CONTENT_MAX
+        ? parsed.data.content.slice(0, AI_DESCRIPTION_CONTENT_MAX) + "..."
+        : parsed.data.content;
+      text += `\n\nContent: ${truncated}`;
+    }
+    if (parsed.data.url) {
+      text += `\n\nURL: ${parsed.data.url}`;
+    }
+
+    const response = await openai.responses.create({
+      model: AI_MODEL,
+      instructions:
+        "You are a developer tool assistant. Generate a concise 1-2 sentence description/summary " +
+        "for the given item based on its title and content. Make it informative and useful for " +
+        "a developer. Respond in JSON format: { \"description\": \"your summary here\" }",
+      input: text,
+      text: {
+        format: { type: "json_object" },
+      },
+    });
+
+    const raw = JSON.parse(response.output_text);
+
+    if (raw && typeof raw === "object" && "description" in raw) {
+      const description = String(raw.description).trim();
+      if (description.length > 0) {
+        return { success: true, data: { description } };
+      }
+    }
+
+    return { success: false, error: "Could not generate description. Try again." };
+  } catch (error) {
+    if (error instanceof OpenAI.APIError) {
+      console.error("OpenAI API error:", error.status, error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    if (error instanceof OpenAI.APIConnectionError) {
+      console.error("OpenAI connection error:", error.message);
+      return { success: false, error: "AI service temporarily unavailable" };
+    }
+    console.error("Failed to generate description:", error);
+    return { success: false, error: "Failed to generate description" };
   }
 }

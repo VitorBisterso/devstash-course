@@ -210,6 +210,8 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 <ItemDrawerEditHeader
                   title={formData.title}
                   description={formData.description}
+                  content={formData.content}
+                  url={formData.url}
                   onTitleChange={(v) => handleFormDataChange({ title: v })}
                   onDescriptionChange={(v) => handleFormDataChange({ description: v })}
                 />
