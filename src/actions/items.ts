@@ -1,9 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@/auth";
 import { canCreateItem } from "@/lib/limits";
 import { updateItem as dbUpdateItem, createItem as dbCreateItem, getSystemItemTypes, toggleItemFavorite as dbToggleItemFavorite, toggleItemPin as dbToggleItemPin } from "@/lib/db/items";
+import { requireAuth, unauthorizedError, formatZodErrors, toggleAction, type ActionResult } from "@/lib/actions/shared";
 
 const createItemSchema = z.object({
   title: z
@@ -29,21 +29,13 @@ const createItemSchema = z.object({
 
 export type CreateItemInput = z.infer<typeof createItemSchema>;
 
-export interface CreateItemResult {
-  success: boolean;
-  data?: { id: string };
-  error?: string;
-  fieldErrors?: Record<string, string[]>;
-}
+export type CreateItemResult = ActionResult<{ id: string }>;
 
 export async function createItem(data: unknown): Promise<CreateItemResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const limitCheck = await canCreateItem(session.user.id);
+  const limitCheck = await canCreateItem(userId);
   if (!limitCheck) {
     return { success: false, error: "Free plan limited to 50 items. Upgrade to Pro for unlimited items." };
   }
@@ -51,23 +43,15 @@ export async function createItem(data: unknown): Promise<CreateItemResult> {
   const parsed = createItemSchema.safeParse(data);
 
   if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const error of parsed.error.issues) {
-      const path = error.path.join(".");
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = [];
-      }
-      fieldErrors[path].push(error.message);
-    }
     return {
       success: false,
       error: "Validation failed",
-      fieldErrors,
+      fieldErrors: formatZodErrors(parsed.error),
     };
   }
 
   try {
-    const result = await dbCreateItem(session.user.id, {
+    const result = await dbCreateItem(userId, {
       title: parsed.data.title,
       description: parsed.data.description ?? null,
       content: parsed.data.content ?? null,
@@ -149,27 +133,16 @@ export async function updateItem(
   itemId: string,
   data: unknown
 ): Promise<UpdateItemResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
   const parsed = updateItemSchema.safeParse(data);
 
   if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const error of parsed.error.issues) {
-      const path = error.path.join(".");
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = [];
-      }
-      fieldErrors[path].push(error.message);
-    }
     return {
       success: false,
       error: "Validation failed",
-      fieldErrors,
+      fieldErrors: formatZodErrors(parsed.error),
     };
   }
 
@@ -183,7 +156,7 @@ export async function updateItem(
       tags: parsed.data.tags,
       collectionIds: parsed.data.collectionIds,
     };
-    const result = await dbUpdateItem(session.user.id, itemId, dbData);
+    const result = await dbUpdateItem(userId, itemId, dbData);
 
     if (!result) {
       return { success: false, error: "Item not found" };
@@ -196,60 +169,18 @@ export async function updateItem(
   }
 }
 
-export interface ToggleItemFavoriteResult {
-  success: boolean;
-  isFavorite?: boolean;
-  error?: string;
-}
+export type ToggleItemFavoriteResult = ActionResult<{ isFavorite: boolean }>;
 
-export interface ToggleItemPinResult {
-  success: boolean;
-  isPinned?: boolean;
-  error?: string;
-}
+export type ToggleItemPinResult = ActionResult<{ isPinned: boolean }>;
 
 export async function toggleItemPin(
   itemId: string
 ): Promise<ToggleItemPinResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    const isPinned = await dbToggleItemPin(session.user.id, itemId);
-
-    if (isPinned === null) {
-      return { success: false, error: "Item not found" };
-    }
-
-    return { success: true, isPinned };
-  } catch (error) {
-    console.error("Failed to toggle item pin:", error);
-    return { success: false, error: "Failed to toggle item pin" };
-  }
+  return toggleAction(itemId, dbToggleItemPin, "isPinned", "Item not found", "toggle item pin");
 }
 
 export async function toggleItemFavorite(
   itemId: string
 ): Promise<ToggleItemFavoriteResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    const isFavorite = await dbToggleItemFavorite(session.user.id, itemId);
-
-    if (isFavorite === null) {
-      return { success: false, error: "Item not found" };
-    }
-
-    return { success: true, isFavorite };
-  } catch (error) {
-    console.error("Failed to toggle item favorite:", error);
-    return { success: false, error: "Failed to toggle item favorite" };
-  }
+  return toggleAction(itemId, dbToggleItemFavorite, "isFavorite", "Item not found", "toggle item favorite");
 }

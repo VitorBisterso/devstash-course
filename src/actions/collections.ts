@@ -1,7 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@/auth";
 import { canCreateCollection } from "@/lib/limits";
 import {
   createCollection as dbCreateCollection,
@@ -11,6 +10,7 @@ import {
   removeItemFromCollection as dbRemoveItemFromCollection,
   toggleCollectionFavorite as dbToggleCollectionFavorite,
 } from "@/lib/db/collections";
+import { requireAuth, unauthorizedError, formatZodErrors, toggleAction, type ActionResult } from "@/lib/actions/shared";
 
 const createCollectionSchema = z.object({
   name: z
@@ -30,23 +30,15 @@ const updateCollectionSchema = z.object({
 
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 
-export interface CreateCollectionResult {
-  success: boolean;
-  data?: { id: string };
-  error?: string;
-  fieldErrors?: Record<string, string[]>;
-}
+export type CreateCollectionResult = ActionResult<{ id: string }>;
 
 export async function createCollection(
   data: unknown
 ): Promise<CreateCollectionResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const limitCheck = await canCreateCollection(session.user.id);
+  const limitCheck = await canCreateCollection(userId);
   if (!limitCheck) {
     return { success: false, error: "Free plan limited to 3 collections. Upgrade to Pro for unlimited collections." };
   }
@@ -54,23 +46,15 @@ export async function createCollection(
   const parsed = createCollectionSchema.safeParse(data);
 
   if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const error of parsed.error.issues) {
-      const path = error.path.join(".");
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = [];
-      }
-      fieldErrors[path].push(error.message);
-    }
     return {
       success: false,
       error: "Validation failed",
-      fieldErrors,
+      fieldErrors: formatZodErrors(parsed.error),
     };
   }
 
   try {
-    const result = await dbCreateCollection(session.user.id, {
+    const result = await dbCreateCollection(userId, {
       name: parsed.data.name,
       description: parsed.data.description ?? null,
     });
@@ -83,52 +67,34 @@ export async function createCollection(
 }
 
 export async function getCollections(): Promise<{ id: string; name: string }[]> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return [];
-  }
-  return dbGetCollections(session.user.id);
+  const userId = await requireAuth();
+  if (!userId) return [];
+  return dbGetCollections(userId);
 }
 
 export type UpdateCollectionInput = z.infer<typeof updateCollectionSchema>;
 
-export interface UpdateCollectionResult {
-  success: boolean;
-  data?: { id: string };
-  error?: string;
-  fieldErrors?: Record<string, string[]>;
-}
+export type UpdateCollectionResult = ActionResult<{ id: string }>;
 
 export async function updateCollection(
   collectionId: string,
   data: unknown
 ): Promise<UpdateCollectionResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
   const parsed = updateCollectionSchema.safeParse(data);
 
   if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const error of parsed.error.issues) {
-      const path = error.path.join(".");
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = [];
-      }
-      fieldErrors[path].push(error.message);
-    }
     return {
       success: false,
       error: "Validation failed",
-      fieldErrors,
+      fieldErrors: formatZodErrors(parsed.error),
     };
   }
 
   try {
-    const result = await dbUpdateCollection(session.user.id, collectionId, {
+    const result = await dbUpdateCollection(userId, collectionId, {
       name: parsed.data.name,
       description: parsed.data.description ?? null,
     });
@@ -144,22 +110,16 @@ export async function updateCollection(
   }
 }
 
-export interface DeleteCollectionResult {
-  success: boolean;
-  error?: string;
-}
+export type DeleteCollectionResult = ActionResult;
 
 export async function deleteCollection(
   collectionId: string
 ): Promise<DeleteCollectionResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
   try {
-    await dbDeleteCollection(session.user.id, collectionId);
+    await dbDeleteCollection(userId, collectionId);
     return { success: true };
   } catch (error) {
     console.error("Failed to delete collection:", error);
@@ -167,23 +127,17 @@ export async function deleteCollection(
   }
 }
 
-export interface RemoveItemFromCollectionResult {
-  success: boolean;
-  error?: string;
-}
+export type RemoveItemFromCollectionResult = ActionResult;
 
 export async function removeItemFromCollection(
   collectionId: string,
   itemId: string
 ): Promise<RemoveItemFromCollectionResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
   try {
-    await dbRemoveItemFromCollection(session.user.id, collectionId, itemId);
+    await dbRemoveItemFromCollection(userId, collectionId, itemId);
     return { success: true };
   } catch (error) {
     console.error("Failed to remove item from collection:", error);
@@ -191,31 +145,10 @@ export async function removeItemFromCollection(
   }
 }
 
-export interface ToggleCollectionFavoriteResult {
-  success: boolean;
-  isFavorite?: boolean;
-  error?: string;
-}
+export type ToggleCollectionFavoriteResult = ActionResult<{ isFavorite: boolean }>;
 
 export async function toggleCollectionFavorite(
   collectionId: string
 ): Promise<ToggleCollectionFavoriteResult> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    const isFavorite = await dbToggleCollectionFavorite(session.user.id, collectionId);
-
-    if (isFavorite === null) {
-      return { success: false, error: "Collection not found" };
-    }
-
-    return { success: true, isFavorite };
-  } catch (error) {
-    console.error("Failed to toggle collection favorite:", error);
-    return { success: false, error: "Failed to toggle collection favorite" };
-  }
+  return toggleAction(collectionId, dbToggleCollectionFavorite, "isFavorite", "Collection not found", "toggle collection favorite");
 }

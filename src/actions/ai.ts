@@ -1,12 +1,11 @@
 "use server";
 
 import { z } from "zod";
-import OpenAI from "openai";
-import { auth } from "@/auth";
 import { canUseAI } from "@/lib/limits";
 import openai, { AI_MODEL } from "@/lib/openai";
 import { aiRatelimits, checkRateLimit } from "@/lib/rate-limit";
 import { AI_TAGS_CONTENT_MAX, AI_DESCRIPTION_CONTENT_MAX, AI_EXPLAIN_CONTENT_MAX, AI_OPTIMIZE_CONTENT_MAX } from "@/lib/constants";
+import { requireAuth, unauthorizedError, rateLimitError, handleOpenAIError } from "@/lib/actions/shared";
 
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1).max(500),
@@ -47,16 +46,19 @@ function parseTagsResponse(raw: unknown): string[] {
   return [];
 }
 
+async function checkAI(userId: string) {
+  if (!(await canUseAI(userId))) {
+    return { success: false as const, error: "AI features require a Pro subscription" };
+  }
+  return null;
+}
+
 export async function generateAutoTags(data: unknown): Promise<GenerateAutoTagsResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  if (!(await canUseAI(session.user.id))) {
-    return { success: false, error: "AI features require a Pro subscription" };
-  }
+  const aiCheck = await checkAI(userId);
+  if (aiCheck) return aiCheck;
 
   const parsed = generateAutoTagsSchema.safeParse(data);
 
@@ -64,14 +66,10 @@ export async function generateAutoTags(data: unknown): Promise<GenerateAutoTagsR
     return { success: false, error: "Invalid input" };
   }
 
-  const rateLimitResult = await checkRateLimit(aiRatelimits.tags, session.user.id);
+  const rateLimitResult = await checkRateLimit(aiRatelimits.tags, userId);
 
   if (!rateLimitResult.success) {
-    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
-    return {
-      success: false,
-      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
-    };
+    return rateLimitError(rateLimitResult);
   }
 
   try {
@@ -102,16 +100,7 @@ export async function generateAutoTags(data: unknown): Promise<GenerateAutoTagsR
 
     return { success: true, data: { tags } };
   } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      console.error("OpenAI API error:", error.status, error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    if (error instanceof OpenAI.APIConnectionError) {
-      console.error("OpenAI connection error:", error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    console.error("Failed to generate auto tags:", error);
-    return { success: false, error: "Failed to generate auto tags" };
+    return handleOpenAIError(error, "generate auto tags");
   }
 }
 
@@ -130,15 +119,11 @@ export interface GenerateDescriptionResult {
 }
 
 export async function generateDescription(data: unknown): Promise<GenerateDescriptionResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  if (!(await canUseAI(session.user.id))) {
-    return { success: false, error: "AI features require a Pro subscription" };
-  }
+  const aiCheck = await checkAI(userId);
+  if (aiCheck) return aiCheck;
 
   const parsed = generateDescriptionSchema.safeParse(data);
 
@@ -146,14 +131,10 @@ export async function generateDescription(data: unknown): Promise<GenerateDescri
     return { success: false, error: "Invalid input" };
   }
 
-  const rateLimitResult = await checkRateLimit(aiRatelimits.description, session.user.id);
+  const rateLimitResult = await checkRateLimit(aiRatelimits.description, userId);
 
   if (!rateLimitResult.success) {
-    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
-    return {
-      success: false,
-      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
-    };
+    return rateLimitError(rateLimitResult);
   }
 
   try {
@@ -191,16 +172,7 @@ export async function generateDescription(data: unknown): Promise<GenerateDescri
 
     return { success: false, error: "Could not generate description. Try again." };
   } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      console.error("OpenAI API error:", error.status, error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    if (error instanceof OpenAI.APIConnectionError) {
-      console.error("OpenAI connection error:", error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    console.error("Failed to generate description:", error);
-    return { success: false, error: "Failed to generate description" };
+    return handleOpenAIError(error, "generate description");
   }
 }
 
@@ -219,15 +191,11 @@ export interface ExplainCodeResult {
 }
 
 export async function explainCode(data: unknown): Promise<ExplainCodeResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  if (!(await canUseAI(session.user.id))) {
-    return { success: false, error: "AI features require a Pro subscription" };
-  }
+  const aiCheck = await checkAI(userId);
+  if (aiCheck) return aiCheck;
 
   const parsed = explainCodeSchema.safeParse(data);
 
@@ -235,14 +203,10 @@ export async function explainCode(data: unknown): Promise<ExplainCodeResult> {
     return { success: false, error: "Invalid input" };
   }
 
-  const rateLimitResult = await checkRateLimit(aiRatelimits.explain, session.user.id);
+  const rateLimitResult = await checkRateLimit(aiRatelimits.explain, userId);
 
   if (!rateLimitResult.success) {
-    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
-    return {
-      success: false,
-      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
-    };
+    return rateLimitError(rateLimitResult);
   }
 
   try {
@@ -281,16 +245,7 @@ export async function explainCode(data: unknown): Promise<ExplainCodeResult> {
 
     return { success: false, error: "Could not generate explanation. Try again." };
   } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      console.error("OpenAI API error:", error.status, error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    if (error instanceof OpenAI.APIConnectionError) {
-      console.error("OpenAI connection error:", error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    console.error("Failed to generate code explanation:", error);
-    return { success: false, error: "Failed to generate code explanation" };
+    return handleOpenAIError(error, "generate code explanation");
   }
 }
 
@@ -308,15 +263,11 @@ export interface OptimizePromptResult {
 }
 
 export async function optimizePrompt(data: unknown): Promise<OptimizePromptResult> {
-  const session = await auth();
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  if (!(await canUseAI(session.user.id))) {
-    return { success: false, error: "AI features require a Pro subscription" };
-  }
+  const aiCheck = await checkAI(userId);
+  if (aiCheck) return aiCheck;
 
   const parsed = optimizePromptSchema.safeParse(data);
 
@@ -324,14 +275,10 @@ export async function optimizePrompt(data: unknown): Promise<OptimizePromptResul
     return { success: false, error: "Invalid input" };
   }
 
-  const rateLimitResult = await checkRateLimit(aiRatelimits.optimize, session.user.id);
+  const rateLimitResult = await checkRateLimit(aiRatelimits.optimize, userId);
 
   if (!rateLimitResult.success) {
-    const retryAfter = Math.max(1, Math.ceil((rateLimitResult.reset - Date.now()) / 1000));
-    return {
-      success: false,
-      error: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
-    };
+    return rateLimitError(rateLimitResult);
   }
 
   try {
@@ -368,15 +315,6 @@ export async function optimizePrompt(data: unknown): Promise<OptimizePromptResul
 
     return { success: false, error: "Could not optimize prompt. Try again." };
   } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      console.error("OpenAI API error:", error.status, error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    if (error instanceof OpenAI.APIConnectionError) {
-      console.error("OpenAI connection error:", error.message);
-      return { success: false, error: "AI service temporarily unavailable" };
-    }
-    console.error("Failed to optimize prompt:", error);
-    return { success: false, error: "Failed to optimize prompt" };
+    return handleOpenAIError(error, "optimize prompt");
   }
 }

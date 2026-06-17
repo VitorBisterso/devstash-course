@@ -1,21 +1,18 @@
 "use server";
 
-import { auth } from "@/auth";
 import { updateEditorPreferences } from "@/lib/db/editor-preferences";
 import { DEFAULT_EDITOR_PREFERENCES, EditorPreferences } from "@/lib/editor-preferences";
 import { revalidatePath } from "next/cache";
+import { requireAuth, unauthorizedError, type ActionResult } from "@/lib/actions/shared";
 
 export async function saveEditorPreferences(
   preferences: Partial<EditorPreferences>
-): Promise<{ success: boolean; error?: string; data?: EditorPreferences }> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+): Promise<ActionResult<EditorPreferences>> {
+  const userId = await requireAuth();
+  if (!userId) return unauthorizedError();
 
   try {
-    const updated = await updateEditorPreferences(session.user.id, preferences);
+    const updated = await updateEditorPreferences(userId, preferences);
     revalidatePath("/settings");
     return { success: true, data: updated };
   } catch (error) {
@@ -25,12 +22,11 @@ export async function saveEditorPreferences(
 }
 
 export async function getEditorPreferencesAction(): Promise<EditorPreferences> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
+  const userId = await requireAuth();
+  if (!userId) {
     return DEFAULT_EDITOR_PREFERENCES;
   }
 
   const { getEditorPreferences } = await import("@/lib/db/editor-preferences");
-  return getEditorPreferences(session.user.id);
+  return getEditorPreferences(userId);
 }

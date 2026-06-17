@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/actions/shared";
 
 export interface SubscriptionStatus {
   isPro: boolean;
@@ -10,14 +10,13 @@ export interface SubscriptionStatus {
 }
 
 export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
+  const userId = await requireAuth();
+  if (!userId) {
     return { isPro: false, stripeCustomerId: null, stripeSubscriptionId: null };
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: userId },
     select: { isPro: true, stripeCustomerId: true, stripeSubscriptionId: true },
   });
 
